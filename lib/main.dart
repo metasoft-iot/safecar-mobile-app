@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:safecar_mobile_app/router/app_router.dart';
 
 void main() {
   runApp(const MainApp());
@@ -9,13 +10,9 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
+      routerConfig: appRouter,
       title: 'SafeCar',
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
-      ),
     );
   }
 }
