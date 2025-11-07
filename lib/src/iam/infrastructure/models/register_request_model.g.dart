@@ -1,0 +1,25 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'register_request_model.dart';
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+RegisterRequestModel _$RegisterRequestModelFromJson(
+  Map<String, dynamic> json,
+) => RegisterRequestModel(
+  email: json['email'] as String,
+  password: json['password'] as String,
+  confirmPassword: json['confirmPassword'] as String,
+  roles: (json['roles'] as List<dynamic>).map((e) => e as String).toList(),
+);
+
+Map<String, dynamic> _$RegisterRequestModelToJson(
+  RegisterRequestModel instance,
+) => <String, dynamic>{
+  'email': instance.email,
+  'password': instance.password,
+  'confirmPassword': instance.confirmPassword,
+  'roles': instance.roles,
+};
