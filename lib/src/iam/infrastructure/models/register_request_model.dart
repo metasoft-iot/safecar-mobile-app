@@ -17,6 +17,5 @@ class RegisterRequestModel {
     required this.roles,
   });
 
-  // El método para CONVERTIR el objeto a un JSON
   Map<String, dynamic> toJson() => _$RegisterRequestModelToJson(this);
 }

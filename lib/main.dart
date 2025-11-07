@@ -67,7 +67,6 @@ class AppState extends StatelessWidget {
                 registerUseCase: registerUseCase,
                 logoutUseCase: logoutUseCase,
               );
-              // TODO: Deberías añadir un evento para chequear el estado inicial
               // ..add(CheckInitialAuthStatus());
             },
           ),
