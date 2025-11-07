@@ -1,6 +1,9 @@
-
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:safecar_mobile_app/src/iam/application/blocs/auth_bloc.dart';
+import 'package:safecar_mobile_app/src/iam/application/blocs/auth_event.dart';
+import 'package:safecar_mobile_app/src/iam/application/blocs/auth_state.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -11,18 +14,42 @@ class DashboardScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: const Color(0xFF333366),
-        title: const Text('Dashboard', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const Text('Dashboard',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         centerTitle: true,
         automaticallyImplyLeading: false,
+        actions: [
+          // Añadido botón de Logout
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white),
+            onPressed: () {
+              // Enviar evento de Logout al BLoC
+              context.read<AuthBloc>().add(const LogoutRequested());
+            },
+          )
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(50.0),
           child: Container(
             alignment: Alignment.centerLeft,
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: Chip(
-              label: const Text('Hello, \"User\"'),
-              backgroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+            // 1. Usar BlocBuilder para obtener el nombre del usuario
+            child: BlocBuilder<AuthBloc, AuthState>(
+              builder: (context, state) {
+                String username = 'User'; // Valor por defecto
+                if (state is Authenticated) {
+                  // 2. Usar el username o email del estado
+                  username = state.user.username.isNotEmpty
+                      ? state.user.username
+                      : state.user.email;
+                }
+                return Chip(
+                  label: Text('Hello, "$username"'),
+                  backgroundColor: Colors.white,
+                  padding:
+                  const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                );
+              },
             ),
           ),
         ),
@@ -36,15 +63,18 @@ class DashboardScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildDashboardButton(context, Icons.directions_car, 'Vehicle\nstatus'),
-                  _buildDashboardButton(context, Icons.calendar_today, 'Next\nappointment'),
+                  _buildDashboardButton(
+                      context, Icons.directions_car, 'Vehicle\nstatus'),
+                  _buildDashboardButton(
+                      context, Icons.calendar_today, 'Next\nappointment'),
                 ],
               ),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildDashboardButton(context, Icons.notifications_active, 'Active\nreminders'),
+                  _buildDashboardButton(
+                      context, Icons.notifications_active, 'Active\nreminders'),
                   _buildDashboardButton(context, Icons.build, 'Maintenance'),
                 ],
               ),
@@ -54,25 +84,30 @@ class DashboardScreen extends StatelessWidget {
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
-              _buildSummaryItem('Last alert received', 'Low Tire Pressure', 'October 20st, 2:30 PM'),
+              _buildSummaryItem('Last alert received', 'Low Tire Pressure',
+                  'October 20st, 2:30 PM'),
               const SizedBox(height: 16),
-              _buildSummaryItem('Current mileage', '52,480 km', 'Last synced 10:30 AM'),
+              _buildSummaryItem(
+                  'Current mileage', '52,480 km', 'Last synced 10:30 AM'),
             ],
           ),
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.directions_car), label: 'Vehicles'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.directions_car), label: 'Vehicles'),
           BottomNavigationBarItem(icon: Icon(Icons.sync), label: 'Status'),
-          BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'Appointment'),
-          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.calendar_today), label: 'Appointment'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.dashboard), label: 'Dashboard'),
         ],
         currentIndex: 3,
         onTap: (index) {
-            switch (index) {
+          switch (index) {
             case 0:
-              context.go('/vehicles');
+            // context.go('/vehicles');
               break;
             case 3:
               context.go('/dashboard');
@@ -86,7 +121,8 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDashboardButton(BuildContext context, IconData icon, String label) {
+  Widget _buildDashboardButton(
+      BuildContext context, IconData icon, String label) {
     return Expanded(
       child: Card(
         elevation: 2,
@@ -102,7 +138,9 @@ class DashboardScreen extends StatelessWidget {
               children: [
                 Icon(icon, size: 40, color: Colors.black87),
                 const SizedBox(height: 8),
-                Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 16)),
+                Text(label,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 16)),
               ],
             ),
           ),
@@ -115,7 +153,8 @@ class DashboardScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        Text(title,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
         const SizedBox(height: 4),
         Text(value, style: const TextStyle(fontSize: 16)),
         Text(subtitle, style: const TextStyle(color: Colors.grey, fontSize: 14)),
