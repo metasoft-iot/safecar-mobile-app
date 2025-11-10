@@ -11,7 +11,10 @@ class VehicleDetailsScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFF333366),
         title: const Text('Vehicle Details', style: TextStyle(color: Colors.white)),
-        leading: const Icon(Icons.arrow_back, color: Colors.white),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => context.pop(),
+        ),
         actions: const [Icon(Icons.edit, color: Colors.white)],
       ),
       body: SingleChildScrollView(
@@ -108,6 +111,19 @@ class VehicleDetailsScreen extends StatelessWidget {
         currentIndex: 0,
         selectedItemColor: const Color(0xFF333366),
         unselectedItemColor: Colors.grey,
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              context.go('/vehicles');
+              break;
+            case 1:
+              context.go('/status?vehicleId=1');
+              break;
+            case 3:
+              context.go('/dashboard');
+              break;
+          }
+        },
       ),
     );
   }

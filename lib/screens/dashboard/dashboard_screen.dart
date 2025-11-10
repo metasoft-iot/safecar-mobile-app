@@ -36,7 +36,12 @@ class DashboardScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildDashboardButton(context, Icons.directions_car, 'Vehicle\nstatus'),
+                  _buildDashboardButton(
+                    context,
+                    Icons.directions_car,
+                    'Vehicle\nstatus',
+                    onTap: () => context.go('/status?vehicleId=1'),
+                  ),
                   _buildDashboardButton(context, Icons.calendar_today, 'Next\nappointment'),
                 ],
               ),
@@ -74,6 +79,9 @@ class DashboardScreen extends StatelessWidget {
             case 0:
               context.go('/vehicles');
               break;
+            case 1:
+              context.go('/status?vehicleId=1');
+              break;
             case 3:
               context.go('/dashboard');
               break;
@@ -86,14 +94,14 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDashboardButton(BuildContext context, IconData icon, String label) {
+  Widget _buildDashboardButton(BuildContext context, IconData icon, String label, {VoidCallback? onTap}) {
     return Expanded(
       child: Card(
         elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         color: const Color(0xFFFDF6F6),
         child: InkWell(
-          onTap: () {},
+          onTap: onTap,
           borderRadius: BorderRadius.circular(16),
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
