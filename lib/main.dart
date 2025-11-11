@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:safecar_mobile_app/core/router/app_router.dart';
-import 'package:safecar_mobile_app/core/theme/app_theme.dart';
+import 'package:safecar_mobile_app/router/app_router.dart';
+import 'package:safecar_mobile_app/shared/theme/app_theme.dart';
 
 void main() {
   runApp(const MainApp());
