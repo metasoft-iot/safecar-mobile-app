@@ -1,11 +1,11 @@
 library;
 
 import 'package:go_router/go_router.dart';
-import 'package:safecar_mobile_app/workshop/presentation/views/appointments/appointment_details_page.dart';
-import 'package:safecar_mobile_app/workshop/presentation/views/appointments/appointment_page.dart';
-import 'package:safecar_mobile_app/workshop/presentation/views/appointments/create_appointment_page.dart';
-import 'package:safecar_mobile_app/workshop/presentation/views/appointments/reschedule_appointment_page.dart';
-import 'package:safecar_mobile_app/workshop/presentation/workshop_router/workshop_route_constants.dart';
+import 'package:safecar_mobile_app/workshop/presentation/pages/appointments/appointment_details_page.dart';
+import 'package:safecar_mobile_app/workshop/presentation/pages/appointments/appointment_page.dart';
+import 'package:safecar_mobile_app/workshop/presentation/pages/appointments/create_appointment_page.dart';
+import 'package:safecar_mobile_app/workshop/presentation/pages/appointments/reschedule_appointment_page.dart';
+import 'package:safecar_mobile_app/workshop/presentation/router/workshop_route_constants.dart';
 
 /// Workshop routes configuration
 class WorkshopRoutes {

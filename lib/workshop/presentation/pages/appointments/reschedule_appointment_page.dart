@@ -6,7 +6,7 @@ import 'package:safecar_mobile_app/workshop/presentation/widgets/appointments/da
 import 'package:safecar_mobile_app/workshop/presentation/widgets/appointments/time_picker_field.dart';
 import 'package:safecar_mobile_app/workshop/presentation/widgets/appointments/service_type_dropdown.dart';
 import 'package:safecar_mobile_app/workshop/infrastructure/mock_appointment_data.dart';
-import 'package:safecar_mobile_app/workshop/domain/model/appointment.dart';
+import 'package:safecar_mobile_app/workshop/domain/entities/appointment.dart';
 
 /// SafeCar Mobile App - Reschedule Appointment Page
 /// Allows users to reschedule an existing appointment

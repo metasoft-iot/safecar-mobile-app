@@ -3,7 +3,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:safecar_mobile_app/router/route_constants.dart';
-import 'package:safecar_mobile_app/workshop/presentation/workshop_router/workshop_route_constants.dart';
+import 'package:safecar_mobile_app/workshop/presentation/router/workshop_route_constants.dart';
 
 /// Helper class for appointment navigation
 /// Provides type-safe navigation methods for appointment pages
