@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:safecar_mobile_app/router/route_constants.dart';
 import 'package:safecar_mobile_app/shared/presentation/pages/not_found_page.dart';
-import 'package:safecar_mobile_app/shared/widgets/main_layout.dart';
+import 'package:safecar_mobile_app/shared/presentation/pages/main_layout.dart';
 import 'package:safecar_mobile_app/shared/theme/app_colors.dart';
 import 'package:safecar_mobile_app/workshop/presentation/workshop_router/workshop_routes.dart';
 
