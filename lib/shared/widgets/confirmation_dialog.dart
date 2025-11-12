@@ -3,7 +3,7 @@ import 'package:safecar_mobile_app/shared/theme/app_colors.dart';
 
 /// SafeCar Mobile App - Confirmation Dialog
 /// Completely reusable and generic confirmation dialog for any action
-/// 
+///
 /// Usage examples:
 /// ```dart
 /// // Delete confirmation
@@ -14,7 +14,7 @@ import 'package:safecar_mobile_app/shared/theme/app_colors.dart';
 ///   message: 'This action cannot be undone.',
 ///   onConfirm: () => deleteItem(),
 /// );
-/// 
+///
 /// // Warning confirmation
 /// ConfirmationDialog.show(
 ///   context: context,
@@ -24,7 +24,7 @@ import 'package:safecar_mobile_app/shared/theme/app_colors.dart';
 ///   confirmText: 'Continue',
 ///   onConfirm: () => continueAction(),
 /// );
-/// 
+///
 /// // Custom confirmation
 /// ConfirmationDialog.show(
 ///   context: context,
@@ -39,13 +39,7 @@ import 'package:safecar_mobile_app/shared/theme/app_colors.dart';
 ///   onConfirm: () {},
 /// );
 /// ```
-enum ConfirmationDialogType {
-  delete,
-  warning,
-  info,
-  success,
-  custom,
-}
+enum ConfirmationDialogType { delete, warning, info, success, custom }
 
 class ConfirmationDialog extends StatelessWidget {
   final String title;
@@ -178,9 +172,7 @@ class ConfirmationDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -194,11 +186,7 @@ class ConfirmationDialog extends StatelessWidget {
                 color: iconBackgroundColor,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                icon,
-                size: 48,
-                color: iconColor,
-              ),
+              child: Icon(icon, size: 48, color: iconColor),
             ),
             const SizedBox(height: 24),
 
@@ -288,7 +276,7 @@ class ConfirmationDialog extends StatelessWidget {
   }
 
   /// Static method to show the dialog
-  /// 
+  ///
   /// Example:
   /// ```dart
   /// await ConfirmationDialog.show(
@@ -401,9 +389,6 @@ class ConfirmationDialog extends StatelessWidget {
       );
     }
 
-    return showDialog(
-      context: context,
-      builder: (context) => dialog,
-    );
+    return showDialog(context: context, builder: (context) => dialog);
   }
 }

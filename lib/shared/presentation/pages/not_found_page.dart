@@ -33,10 +33,7 @@ class NotFoundPage extends StatelessWidget {
             const SizedBox(height: 10),
             const Text(
               'Page Not Found',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 10),
             const Padding(
@@ -44,19 +41,15 @@ class NotFoundPage extends StatelessWidget {
               child: Text(
                 'The page you are looking for does not exist or has been moved.',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.grey),
               ),
             ),
             const SizedBox(height: 30),
             ElevatedButton.icon(
               onPressed: () {
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                  '/',
-                  (route) => false,
-                );
+                Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil('/', (route) => false);
               },
               icon: const Icon(Icons.home),
               label: const Text('Go to Home'),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Sistema de tipografías para SafeCar Mobile App basado en Material Design 3
-/// 
+///
 /// Esta clase proporciona un TextTheme completo usando fuentes del sistema
 /// con una jerarquía visual clara y consistente siguiendo Clean Architecture
 class AppTypography {
@@ -10,9 +10,9 @@ class AppTypography {
   // ═══════════════════════════════════════════════════════════════════════════
   // TEXT THEME PRINCIPAL - LISTO PARA USAR EN THEMEDATA
   // ═══════════════════════════════════════════════════════════════════════════
-  
+
   /// TextTheme completo para usar directamente en ThemeData
-  /// 
+  ///
   /// Uso:
   /// ```dart
   /// theme: ThemeData(
@@ -23,7 +23,7 @@ class AppTypography {
     // ═══════════════════════════════════════════════════════════════════════════
     // DISPLAY STYLES - Para elementos hero y títulos principales
     // ═══════════════════════════════════════════════════════════════════════════
-    
+
     /// Títulos principales de pantalla (40px, Bold)
     displayLarge: TextStyle(
       fontSize: 40,
@@ -49,7 +49,6 @@ class AppTypography {
     // ═══════════════════════════════════════════════════════════════════════════
     // HEADLINE STYLES - Para encabezados de secciones
     // ═══════════════════════════════════════════════════════════════════════════
-    
     headlineLarge: TextStyle(
       fontSize: 28,
       fontWeight: FontWeight.w600, // SemiBold
@@ -75,7 +74,7 @@ class AppTypography {
     // ═══════════════════════════════════════════════════════════════════════════
     // TITLE STYLES - Para títulos de componentes y tarjetas
     // ═══════════════════════════════════════════════════════════════════════════
-    
+
     /// Títulos de tarjetas y componentes (20px, Medium)
     titleLarge: TextStyle(
       fontSize: 20,
@@ -101,7 +100,7 @@ class AppTypography {
     // ═══════════════════════════════════════════════════════════════════════════
     // BODY STYLES - Para contenido de texto principal
     // ═══════════════════════════════════════════════════════════════════════════
-    
+
     /// Texto de cuerpo principal (16px, Regular)
     bodyLarge: TextStyle(
       fontSize: 16,
@@ -128,7 +127,6 @@ class AppTypography {
     // ═══════════════════════════════════════════════════════════════════════════
     // LABEL STYLES - Para etiquetas, botones y elementos interactivos
     // ═══════════════════════════════════════════════════════════════════════════
-    
     labelLarge: TextStyle(
       fontSize: 14,
       fontWeight: FontWeight.w500, // Medium
@@ -180,7 +178,7 @@ class AppTypography {
     height: 1.3,
     letterSpacing: 0.5,
   );
-  
+
   /// Estilo para badges de estado
   static const TextStyle statusBadge = TextStyle(
     fontSize: 12,

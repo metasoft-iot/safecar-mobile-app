@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:safecar_mobile_app/router/helpers/navigation_helper.dart';
+import 'package:safecar_mobile_app/workshop/presentation/workshop_router/helpers/workshop_navigation_helper.dart';
 import 'package:safecar_mobile_app/shared/theme/app_colors.dart';
 import 'package:safecar_mobile_app/workshop/domain/model/appointment.dart';
 
@@ -53,12 +53,10 @@ class _AppointmentCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: () {
-          NavigationHelper.goToWorkshopDetails(context, appointment.id);
+          AppointmentNavigationHelper.goToAppointmentDetails(context, appointment.id);
         },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
@@ -121,7 +119,7 @@ class _AppointmentCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 8),
-              
+
               Row(
                 children: [
                   const Icon(

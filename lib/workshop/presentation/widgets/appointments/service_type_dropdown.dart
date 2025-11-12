@@ -25,10 +25,7 @@ class ServiceTypeDropdown extends StatelessWidget {
       validator: validator,
       decoration: InputDecoration(
         hintText: 'Select type',
-        hintStyle: TextStyle(
-          color: Colors.grey.shade400,
-          fontSize: 16,
-        ),
+        hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 16),
         filled: true,
         fillColor: AppColors.white,
         contentPadding: const EdgeInsets.symmetric(
@@ -37,42 +34,24 @@ class ServiceTypeDropdown extends StatelessWidget {
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Colors.grey.shade300,
-            width: 1.5,
-          ),
+          borderSide: BorderSide(color: Colors.grey.shade300, width: 1.5),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Colors.grey.shade300,
-            width: 1.5,
-          ),
+          borderSide: BorderSide(color: Colors.grey.shade300, width: 1.5),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: AppColors.primary,
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: AppColors.error,
-            width: 1.5,
-          ),
+          borderSide: const BorderSide(color: AppColors.error, width: 1.5),
         ),
       ),
-      icon: Icon(
-        Icons.keyboard_arrow_down,
-        color: Colors.grey.shade600,
-      ),
+      icon: Icon(Icons.keyboard_arrow_down, color: Colors.grey.shade600),
       items: serviceTypes.map((String service) {
-        return DropdownMenuItem<String>(
-          value: service,
-          child: Text(service),
-        );
+        return DropdownMenuItem<String>(value: service, child: Text(service));
       }).toList(),
       onChanged: onChanged,
     );

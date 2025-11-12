@@ -22,10 +22,10 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
   final _dateController = TextEditingController();
   final _timeController = TextEditingController();
   final _notesController = TextEditingController();
-  
+
   String? _selectedServiceType;
   bool _isFormValid = false;
-  
+
   final List<String> _serviceTypes = [
     'Oil Change',
     'Tire Rotation',
@@ -48,7 +48,8 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
   /// Valida si todos los campos requeridos están completos
   void _validateForm() {
     setState(() {
-      _isFormValid = _dateController.text.isNotEmpty &&
+      _isFormValid =
+          _dateController.text.isNotEmpty &&
           _timeController.text.isNotEmpty &&
           _selectedServiceType != null &&
           _selectedServiceType!.isNotEmpty;
@@ -78,7 +79,7 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
 
     if (picked != null) {
       setState(() {
-        _dateController.text = 
+        _dateController.text =
             '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
       });
       _validateForm();
@@ -194,7 +195,10 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
                   const SizedBox(height: 24),
 
                   // Type of Service Field
-                  const FormFieldLabel(text: 'Type of service', isRequired: true),
+                  const FormFieldLabel(
+                    text: 'Type of service',
+                    isRequired: true,
+                  ),
                   const SizedBox(height: 8),
                   ServiceTypeDropdown(
                     initialValue: _selectedServiceType,
@@ -215,10 +219,7 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
                   const SizedBox(height: 4),
                   const Text(
                     '(*) This field is required',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppColors.error,
-                    ),
+                    style: TextStyle(fontSize: 12, color: AppColors.error),
                   ),
                   const SizedBox(height: 32),
 
@@ -234,8 +235,12 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
                     child: ElevatedButton(
                       onPressed: _isFormValid ? _saveAppointment : null,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _isFormValid ? AppColors.primary : Colors.grey.shade300,
-                        foregroundColor: _isFormValid ? AppColors.white : Colors.grey.shade500,
+                        backgroundColor: _isFormValid
+                            ? AppColors.primary
+                            : Colors.grey.shade300,
+                        foregroundColor: _isFormValid
+                            ? AppColors.white
+                            : Colors.grey.shade500,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -269,10 +274,7 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
       maxLength: 250,
       decoration: InputDecoration(
         hintText: 'Add additional notes here',
-        hintStyle: TextStyle(
-          color: Colors.grey.shade400,
-          fontSize: 16,
-        ),
+        hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 16),
         filled: true,
         fillColor: AppColors.white,
         contentPadding: const EdgeInsets.symmetric(
@@ -281,30 +283,18 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Colors.grey.shade300,
-            width: 1.5,
-          ),
+          borderSide: BorderSide(color: Colors.grey.shade300, width: 1.5),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Colors.grey.shade300,
-            width: 1.5,
-          ),
+          borderSide: BorderSide(color: Colors.grey.shade300, width: 1.5),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: AppColors.primary,
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
         ),
         counterText: '${_notesController.text.length}/250',
-        counterStyle: TextStyle(
-          color: Colors.grey.shade600,
-          fontSize: 12,
-        ),
+        counterStyle: TextStyle(color: Colors.grey.shade600, fontSize: 12),
       ),
       onChanged: (value) {
         setState(() {}); // Update character counter

@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:safecar_mobile_app/router/route_constants.dart';
-import 'package:safecar_mobile_app/shared/pages/not_found_page.dart';
+import 'package:safecar_mobile_app/shared/presentation/pages/not_found_page.dart';
 import 'package:safecar_mobile_app/shared/widgets/main_layout.dart';
-import 'package:safecar_mobile_app/workshop/presentation/views/appointments/appointment_details_page.dart';
-import 'package:safecar_mobile_app/workshop/presentation/views/appointments/appointment_page.dart';
-import 'package:safecar_mobile_app/workshop/presentation/views/appointments/create_appointment_page.dart';
-import 'package:safecar_mobile_app/workshop/presentation/views/appointments/reschedule_appointment_page.dart';
 import 'package:safecar_mobile_app/shared/theme/app_colors.dart';
+import 'package:safecar_mobile_app/workshop/presentation/workshop_router/workshop_routes.dart';
 
 /// Main router configuration for SafeCar Mobile App
 final GoRouter appRouter = GoRouter(
@@ -47,39 +44,9 @@ final GoRouter appRouter = GoRouter(
           ],
         ),
 
-        // Branch 3: Workshop (Appointments)
+        // Branch 3: Workshop (WorkshopRoutes)
         StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: AppRoutes.workshop,
-              builder: (context, state) => const AppointmentPage(),
-              routes: [
-                GoRoute(
-                  path: RoutePaths.workshopDetails,
-                  name: RouteNames.workshopDetails,
-                  builder: (context, state) {
-                    final appointmentId = state.pathParameters['id']!;
-                    return AppointmentDetailsPage(
-                        appointmentId: appointmentId);
-                  },
-                ),
-                GoRoute(
-                  path: RoutePaths.createWorkshop,
-                  name: RouteNames.createWorkshop,
-                  builder: (context, state) => const CreateAppointmentPage(),
-                ),
-                GoRoute(
-                  path: RoutePaths.rescheduleWorkshop,
-                  name: RouteNames.rescheduleWorkshop,
-                  builder: (context, state) {
-                    final appointmentId = state.pathParameters['id']!;
-                    return RescheduleAppointmentPage(
-                        appointmentId: appointmentId);
-                  },
-                ),
-              ],
-            ),
-          ],
+          routes: [WorkshopRoutes.getWorkshopRoute(AppRoutes.workshop)],
         ),
 
         // Branch 4: Dashboard
@@ -124,11 +91,7 @@ class _PlaceholderPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 100,
-              color: color,
-            ),
+            Icon(icon, size: 100, color: color),
             const SizedBox(height: 20),
             Text(
               title,
@@ -141,10 +104,7 @@ class _PlaceholderPage extends StatelessWidget {
             const SizedBox(height: 10),
             const Text(
               'Coming Soon',
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.grey,
-              ),
+              style: TextStyle(fontSize: 18, color: Colors.grey),
             ),
           ],
         ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:safecar_mobile_app/router/helpers/navigation_helper.dart';
+import 'package:safecar_mobile_app/workshop/presentation/workshop_router/helpers/workshop_navigation_helper.dart';
 import 'package:safecar_mobile_app/shared/theme/app_colors.dart';
 
 /// SafeCar Mobile App - Appointment Empty State Widget
@@ -16,11 +16,7 @@ class AppointmentEmptyState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.event_busy,
-              size: 120,
-              color: Colors.grey.shade300,
-            ),
+            Icon(Icons.event_busy, size: 120, color: Colors.grey.shade300),
             const SizedBox(height: 24),
             const Text(
               'No appointments yet!',
@@ -44,7 +40,7 @@ class AppointmentEmptyState extends StatelessWidget {
             const SizedBox(height: 32),
             ElevatedButton.icon(
               onPressed: () {
-                NavigationHelper.goToCreateWorkshop(context);
+                AppointmentNavigationHelper.goToCreateAppointment(context);
               },
               icon: const Icon(Icons.add_circle_outline),
               label: const Text('Schedule Service'),

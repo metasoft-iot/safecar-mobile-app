@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:safecar_mobile_app/shared/widgets/custom_app_bar.dart';
 import 'package:safecar_mobile_app/shared/widgets/confirmation_dialog.dart';
-import 'package:safecar_mobile_app/router/helpers/navigation_helper.dart';
+import 'package:safecar_mobile_app/workshop/presentation/workshop_router/helpers/workshop_navigation_helper.dart';
 import 'package:safecar_mobile_app/shared/theme/app_colors.dart';
 import 'package:safecar_mobile_app/workshop/infrastructure/mock_appointment_data.dart';
 import 'package:safecar_mobile_app/workshop/domain/model/appointment.dart';
@@ -11,10 +11,7 @@ import 'package:safecar_mobile_app/workshop/domain/model/appointment.dart';
 class AppointmentDetailsPage extends StatelessWidget {
   final String appointmentId;
 
-  const AppointmentDetailsPage({
-    super.key,
-    required this.appointmentId,
-  });
+  const AppointmentDetailsPage({super.key, required this.appointmentId});
 
   Color _getStatusColor(AppointmentStatus status) {
     switch (status) {
@@ -46,9 +43,7 @@ class AppointmentDetailsPage extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        body: const Center(
-          child: Text('Appointment not found'),
-        ),
+        body: const Center(child: Text('Appointment not found')),
       );
     }
 
@@ -106,11 +101,7 @@ class AppointmentDetailsPage extends StatelessWidget {
             const SizedBox(height: 24),
 
             // Appointment ID
-            _buildInfoSection(
-              'Appointment ID',
-              appointment.id,
-              Icons.tag,
-            ),
+            _buildInfoSection('Appointment ID', appointment.id, Icons.tag),
             const Divider(height: 32),
 
             // Vehicle Info
@@ -139,11 +130,7 @@ class AppointmentDetailsPage extends StatelessWidget {
             // Notes (only if exists)
             if (appointment.notes != null && appointment.notes!.isNotEmpty) ...[
               const Divider(height: 32),
-              _buildInfoSection(
-                'Notes',
-                appointment.notes!,
-                Icons.notes,
-              ),
+              _buildInfoSection('Notes', appointment.notes!, Icons.notes),
             ],
 
             const SizedBox(height: 32),
@@ -171,7 +158,7 @@ class AppointmentDetailsPage extends StatelessWidget {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        NavigationHelper.goToRescheduleWorkshop(
+                        AppointmentNavigationHelper.goToRescheduleAppointment(
                           context,
                           appointment.id,
                         );
@@ -198,7 +185,7 @@ class AppointmentDetailsPage extends StatelessWidget {
       context: context,
       type: ConfirmationDialogType.delete,
       title: 'Cancel Appointment?',
-      message: 
+      message:
           'When you cancel your appointment, the assigned workshop will be automatically notified, who will contact you to define a solution or reschedule if necessary.\n\n'
           'This action cannot be undone. Are you sure you want to continue?',
       confirmText: 'Confirm',
@@ -219,11 +206,7 @@ class AppointmentDetailsPage extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          icon,
-          color: AppColors.primary,
-          size: 24,
-        ),
+        Icon(icon, color: AppColors.primary, size: 24),
         const SizedBox(width: 16),
         Expanded(
           child: Column(

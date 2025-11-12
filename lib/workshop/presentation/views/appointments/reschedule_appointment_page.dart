@@ -14,13 +14,11 @@ import 'package:safecar_mobile_app/workshop/domain/model/appointment.dart';
 class RescheduleAppointmentPage extends StatefulWidget {
   final String appointmentId;
 
-  const RescheduleAppointmentPage({
-    super.key,
-    required this.appointmentId,
-  });
+  const RescheduleAppointmentPage({super.key, required this.appointmentId});
 
   @override
-  State<RescheduleAppointmentPage> createState() => _RescheduleAppointmentPageState();
+  State<RescheduleAppointmentPage> createState() =>
+      _RescheduleAppointmentPageState();
 }
 
 class _RescheduleAppointmentPageState extends State<RescheduleAppointmentPage> {
@@ -28,11 +26,11 @@ class _RescheduleAppointmentPageState extends State<RescheduleAppointmentPage> {
   final _dateController = TextEditingController();
   final _timeController = TextEditingController();
   final _notesController = TextEditingController();
-  
+
   String? _selectedServiceType;
   bool _isFormValid = false;
   AppointmentModel? _appointment;
-  
+
   final List<String> _serviceTypes = [
     'Oil Change',
     'Tire Rotation',
@@ -54,7 +52,7 @@ class _RescheduleAppointmentPageState extends State<RescheduleAppointmentPage> {
     _appointment = MockAppointmentData.getById(widget.appointmentId);
     if (_appointment != null) {
       // Pre-fill form with existing appointment data
-      _dateController.text = 
+      _dateController.text =
           '${_appointment!.date.day.toString().padLeft(2, '0')}/${_appointment!.date.month.toString().padLeft(2, '0')}/${_appointment!.date.year}';
       _timeController.text = _appointment!.time;
       _selectedServiceType = _appointment!.serviceType;
@@ -74,7 +72,8 @@ class _RescheduleAppointmentPageState extends State<RescheduleAppointmentPage> {
   /// Valida si todos los campos requeridos están completos
   void _validateForm() {
     setState(() {
-      _isFormValid = _dateController.text.isNotEmpty &&
+      _isFormValid =
+          _dateController.text.isNotEmpty &&
           _timeController.text.isNotEmpty &&
           _selectedServiceType != null &&
           _selectedServiceType!.isNotEmpty;
@@ -104,7 +103,7 @@ class _RescheduleAppointmentPageState extends State<RescheduleAppointmentPage> {
 
     if (picked != null) {
       setState(() {
-        _dateController.text = 
+        _dateController.text =
             '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
       });
       _validateForm();
@@ -167,9 +166,7 @@ class _RescheduleAppointmentPageState extends State<RescheduleAppointmentPage> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        body: const Center(
-          child: Text('Appointment not found'),
-        ),
+        body: const Center(child: Text('Appointment not found')),
       );
     }
 
@@ -307,7 +304,8 @@ class _RescheduleAppointmentPageState extends State<RescheduleAppointmentPage> {
                     onPressed: _isFormValid ? _handleSubmit : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      disabledBackgroundColor: AppColors.textSecondary.withValues(alpha: 0.3),
+                      disabledBackgroundColor: AppColors.textSecondary
+                          .withValues(alpha: 0.3),
                       foregroundColor: AppColors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(

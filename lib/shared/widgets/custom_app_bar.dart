@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 /// AppBar genérico para SafeCar Mobile App
-/// 
+///
 /// ## Modos disponibles:
-/// 
+///
 /// ### 1. Simple (solo título centrado)
 /// ```dart
 /// CustomAppBar.simple(
@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 ///   titleStyle: TextStyle(color: Colors.white),
 /// )
 /// ```
-/// 
+///
 /// ### 2. Con botón de retroceso (icono + título centrado)
 /// ```dart
 /// CustomAppBar.withBackButton(
@@ -22,7 +22,7 @@ import 'package:flutter/material.dart';
 ///   onBackPressed: () => Navigator.pop(context), // Opcional
 /// )
 /// ```
-/// 
+///
 /// ## Características:
 /// - ✅ Título siempre centrado en ambos modos
 /// - ✅ Icono de retroceso: `Icons.arrow_back_ios_new`
@@ -47,7 +47,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   });
 
   /// AppBar simple con solo título centrado
-  /// 
+  ///
   /// Ejemplo:
   /// ```dart
   /// CustomAppBar.simple(title: 'Home')
@@ -69,7 +69,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   /// AppBar con icono de retroceso + título centrado
-  /// 
+  ///
   /// Ejemplo:
   /// ```dart
   /// CustomAppBar.withBackButton(
@@ -104,10 +104,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
 
     return AppBar(
-      title: Text(
-        title,
-        style: titleStyle ?? defaultTitleStyle,
-      ),
+      title: Text(title, style: titleStyle ?? defaultTitleStyle),
       centerTitle: true,
       backgroundColor: backgroundColor ?? theme.colorScheme.surface,
       elevation: elevation,

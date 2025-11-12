@@ -164,10 +164,12 @@ class MockAppointmentData {
   static List<AppointmentModel> getUpcoming() {
     final now = DateTime.now();
     return appointments
-        .where((apt) =>
-            apt.date.isAfter(now) &&
-            apt.status != AppointmentStatus.cancelled &&
-            apt.status != AppointmentStatus.completed)
+        .where(
+          (apt) =>
+              apt.date.isAfter(now) &&
+              apt.status != AppointmentStatus.cancelled &&
+              apt.status != AppointmentStatus.completed,
+        )
         .toList()
       ..sort((a, b) => a.date.compareTo(b.date));
   }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:safecar_mobile_app/router/helpers/navigation_helper.dart';
+import 'package:safecar_mobile_app/workshop/presentation/workshop_router/helpers/workshop_navigation_helper.dart';
 import 'package:safecar_mobile_app/shared/widgets/custom_app_bar.dart';
 import 'package:safecar_mobile_app/shared/theme/app_colors.dart';
 import 'package:safecar_mobile_app/workshop/presentation/widgets/appointments/appointment_filter_bar.dart';
@@ -33,7 +33,9 @@ class _AppointmentPageState extends State<AppointmentPage> {
       if (_selectedFilter == 'All') {
         _filteredAppointments = MockAppointmentData.appointments;
       } else {
-        _filteredAppointments = MockAppointmentData.getByStatusText(_selectedFilter);
+        _filteredAppointments = MockAppointmentData.getByStatusText(
+          _selectedFilter,
+        );
       }
     });
   }
@@ -77,13 +79,10 @@ class _AppointmentPageState extends State<AppointmentPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          NavigationHelper.goToCreateWorkshop(context);
+          AppointmentNavigationHelper.goToCreateAppointment(context);
         },
         backgroundColor: AppColors.primary,
-        child: const Icon(
-          Icons.add,
-          color: AppColors.white,
-        ),
+        child: const Icon(Icons.add, color: AppColors.white),
       ),
     );
   }

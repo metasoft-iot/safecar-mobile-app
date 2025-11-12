@@ -7,10 +7,7 @@ import 'package:safecar_mobile_app/shared/widgets/custom_bottom_navigation_bar.d
 class MainLayout extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
-  const MainLayout({
-    super.key,
-    required this.navigationShell,
-  });
+  const MainLayout({super.key, required this.navigationShell});
 
   void _onTabTapped(int index) {
     navigationShell.goBranch(
