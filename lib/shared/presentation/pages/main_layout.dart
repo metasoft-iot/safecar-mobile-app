@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:safecar_mobile_app/shared/widgets/custom_bottom_navigation_bar.dart';
+import 'package:safecar_mobile_app/shared/presentation/widgets/custom_bottom_navigation_bar.dart';
 
 /// Main layout with bottom navigation bar
 /// Uses StatefulNavigationShell from GoRouter for better navigation
