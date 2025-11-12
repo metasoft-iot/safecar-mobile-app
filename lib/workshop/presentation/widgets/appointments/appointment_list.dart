@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:safecar_mobile_app/workshop/presentation/workshop_router/helpers/workshop_navigation_helper.dart';
+import 'package:safecar_mobile_app/workshop/presentation/router/helpers/workshop_navigation_helper.dart';
 import 'package:safecar_mobile_app/shared/theme/app_colors.dart';
-import 'package:safecar_mobile_app/workshop/domain/model/appointment.dart';
+import 'package:safecar_mobile_app/workshop/domain/entities/appointment.dart';
 
 /// SafeCar Mobile App - Appointment List Widget
 /// Displays the list of appointments

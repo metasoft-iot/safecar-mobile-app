@@ -3,7 +3,7 @@
 /// Part of Workshop bounded context
 library;
 
-import 'package:safecar_mobile_app/workshop/domain/model/appointment.dart';
+import 'package:safecar_mobile_app/workshop/domain/entities/appointment.dart';
 
 class MockAppointmentData {
   static final List<AppointmentModel> appointments = [

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:safecar_mobile_app/workshop/presentation/workshop_router/helpers/workshop_navigation_helper.dart';
+import 'package:safecar_mobile_app/workshop/presentation/router/helpers/workshop_navigation_helper.dart';
 import 'package:safecar_mobile_app/shared/theme/app_colors.dart';
 
 /// SafeCar Mobile App - Appointment Empty State Widget
