@@ -38,7 +38,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
                 index: 0,
               ),
               _buildNavItem(
-                icon: Icons.format_list_bulleted,
+                icon: Icons.tune,
                 label: 'Status',
                 index: 1,
               ),
