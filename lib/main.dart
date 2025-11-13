@@ -1,68 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:safecar_mobile_app/src/core/router/app_router.dart';
-import 'package:safecar_mobile_app/src/iam/domain/repositories/auth_repository.dart';
-import 'package:safecar_mobile_app/src/iam/application/blocs/auth_bloc.dart';
-import 'package:safecar_mobile_app/src/iam/application/services/session_service.dart';
-import 'package:safecar_mobile_app/src/iam/application/use_cases/login_use_case.dart';
-import 'package:safecar_mobile_app/src/iam/application/use_cases/logout_use_case.dart';
-import 'package:safecar_mobile_app/src/iam/application/use_cases/register_use_case.dart';
-import 'package:safecar_mobile_app/src/iam/infrastructure/config/dio_client.dart'; // Asegúrate que esta ruta sea correcta
-import 'package:safecar_mobile_app/src/iam/infrastructure/datasources/auth_remote_datasource.dart';
-import 'package:safecar_mobile_app/src/iam/infrastructure/datasources/profile_remote_datasource.dart';
-import 'package:safecar_mobile_app/src/iam/infrastructure/repositories/auth_repository_impl.dart';
+import 'package:safecar_mobile_app/router/app_router.dart';
+import 'package:safecar_mobile_app/shared/theme/app_theme.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  runApp(const AppState());
-}
-
-class AppState extends StatelessWidget {
-  const AppState({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return MultiRepositoryProvider(
-      providers: [
-        RepositoryProvider<AuthRepository>(
-          create: (context) {
-
-            final dio = DioClient().dio;
-            final sessionService = SessionService();
-
-            final authDataSource = AuthRemoteDataSource(dio);
-            final profileDataSource =  ProfileRemoteDataSource(dio); // <-- Nuevo
-
-            return AuthRepositoryImpl(
-              authRemoteDataSource: authDataSource,
-              profileRemoteDataSource: profileDataSource, // <-- Nuevo
-              sessionService: sessionService,
-            );
-          },
-        ),
-        // ... (otros repositorios)
-      ],
-      child: MultiBlocProvider(
-        providers: [
-          BlocProvider<AuthBloc>(
-            create: (context) {
-              final authRepository = context.read<AuthRepository>();
-
-              // Esto no cambia, BLoC no necesita saber sobre los datasources
-              return AuthBloc(
-                loginUseCase: LoginUseCase(authRepository),
-                registerUseCase: RegisterUseCase(authRepository),
-                logoutUseCase: LogoutUseCase(authRepository),
-              );
-            },
-          ),
-          // ... (otros blocs)
-        ],
-        child: const MainApp(),
-      ),
-    );
-  }
+  runApp(const MainApp());
 }
 
 class MainApp extends StatelessWidget {
@@ -70,15 +11,11 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    // Obtenemos la instancia del AppRouter, que ahora puede
-    // acceder al AuthBloc que proveímos arriba
-    final appRouter = AppRouter(context.read<AuthBloc>());
-
     return MaterialApp.router(
-      routerConfig: appRouter.router,
-      title: 'SafeCar',
+      routerConfig: appRouter,
+      title: 'SafeCar Mobile',
       debugShowCheckedModeBanner: false,
+      theme: AppTheme.lightTheme,
     );
   }
 }
