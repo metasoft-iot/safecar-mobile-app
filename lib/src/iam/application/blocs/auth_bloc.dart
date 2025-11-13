@@ -1,13 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../use_cases/login_use_case.dart';
-import '../use_cases/logout_use_case.dart';
-import '../use_cases/register_use_case.dart';
-import 'auth_event.dart';
-import 'auth_state.dart';
+import 'package:safecar_mobile_app/src/iam/application/blocs/auth_event.dart';
+import 'package:safecar_mobile_app/src/iam/application/blocs/auth_state.dart';
+import 'package:safecar_mobile_app/src/iam/application/use_cases/login_use_case.dart';
+import 'package:safecar_mobile_app/src/iam/application/use_cases/register_use_case.dart';
+import 'package:safecar_mobile_app/src/iam/application/use_cases/logout_use_case.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-
   final LoginUseCase _loginUseCase;
   final RegisterUseCase _registerUseCase;
   final LogoutUseCase _logoutUseCase;
@@ -16,16 +14,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required LoginUseCase loginUseCase,
     required RegisterUseCase registerUseCase,
     required LogoutUseCase logoutUseCase,
-  }) : _loginUseCase = loginUseCase,
+  })  : _loginUseCase = loginUseCase,
         _registerUseCase = registerUseCase,
         _logoutUseCase = logoutUseCase,
         super(Unauthenticated()) {
-
     on<LoginRequested>(_onLoginRequested);
     on<RegisterRequested>(_onRegisterRequested);
     on<LogoutRequested>(_onLogoutRequested);
   }
-
 
   Future<void> _onLoginRequested(
       LoginRequested event,
@@ -41,6 +37,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  // --- ACTUALIZADO ---
   Future<void> _onRegisterRequested(
       RegisterRequested event,
       Emitter<AuthState> emit,
@@ -51,9 +48,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         email: event.email,
         password: event.password,
         confirmPassword: event.confirmPassword,
-        roles: [event.role],
+        roles: [event.role], // Pasa el rol como lista
+        fullName: event.fullName,
+        city: event.city,
+        country: event.country,
+        phone: event.phone,
+        dni: event.dni,
       );
-
       emit(Unauthenticated());
     } catch (e) {
       emit(AuthError(message: e.toString()));
