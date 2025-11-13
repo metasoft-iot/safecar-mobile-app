@@ -1,11 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:safecar_mobile_app/shared/theme/app_colors.dart';
-import 'package:safecar_mobile_app/vehicle_management/infrastructure/mock_vehicle_data.dart';
 import 'package:safecar_mobile_app/vehicle_management/domain/model/vehicle_model.dart';
+import 'package:safecar_mobile_app/vehicle_management/infrastructure/mock_vehicle_data.dart';
 
+/// Formulario reutilizable para:
+/// - Crear un nuevo vehículo
+/// - Editar un vehículo existente (cuando se pasa [initialVehicle])
+///
+/// Si [initialVehicle] es null → modo "crear".
+/// Si [initialVehicle] tiene valor → modo "editar".
 class VehicleForm extends StatefulWidget {
-  const VehicleForm({super.key});
+  final VehicleModel? initialVehicle;
+
+  const VehicleForm({
+    super.key,
+    this.initialVehicle,
+  });
+
+  /// Indica si el formulario está en modo edición.
+  bool get isEditing => initialVehicle != null;
 
   @override
   State<VehicleForm> createState() => _VehicleFormState();
@@ -14,7 +28,9 @@ class VehicleForm extends StatefulWidget {
 class _VehicleFormState extends State<VehicleForm> {
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Controllers de campos de texto
+  // ─────────────────────────────────────────────────────────────────────────────
   final _plateCtrl = TextEditingController();
   final _yearCtrl = TextEditingController();
   final _odometerCtrl = TextEditingController();
@@ -23,14 +39,16 @@ class _VehicleFormState extends State<VehicleForm> {
   final _nicknameCtrl = TextEditingController();
   final _notesCtrl = TextEditingController();
 
-  // Dropdowns / switches
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Estado de selects / switches
+  // ─────────────────────────────────────────────────────────────────────────────
   String? _make;
   String? _model;
   String _unit = 'km';
   FuelType _fuel = FuelType.gas;
   bool _isPrimary = false;
 
-  // Mock data
+  // Marcas y modelos disponibles (mock)
   final Map<String, List<String>> _makesModels = const {
     'Toyota': ['Camry', 'RAV4', 'Corolla', 'Hilux'],
     'Ford': ['Explorer', 'F-150', 'Focus'],
@@ -39,16 +57,43 @@ class _VehicleFormState extends State<VehicleForm> {
     'Nissan': ['Sentra', 'X-Trail', 'Frontier'],
   };
 
+  // Paleta fija de colores para el selector
   final List<Color> _colorOptions = const [
     Color(0xFF111827), // Black
-    Color(0xFF4B5563), // Gray
+    Color(0xFF4B5563), // Dark Gray
     Color(0xFF9CA3AF), // Silver
     Color(0xFFFFFFFF), // White
-    Color(0xFF1F2937), // Midnight
+    Color(0xFF1F2937), // Midnight Black
     Color(0xFF1D4ED8), // Blue
     Color(0xFF16A34A), // Green
     Color(0xFFDC2626), // Red
   ];
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Ciclo de vida
+  // ─────────────────────────────────────────────────────────────────────────────
+  @override
+  void initState() {
+    super.initState();
+
+
+    final v = widget.initialVehicle;
+    if (v != null) {
+      _plateCtrl.text = v.licensePlate;
+      _yearCtrl.text = v.year.toString();
+      _odometerCtrl.text = v.mileage.toStringAsFixed(0);
+      _colorCtrl.text = v.color;
+      _vinCtrl.text = v.vin ?? '';
+      _nicknameCtrl.text = v.nickname ?? '';
+      _notesCtrl.text = '';
+
+      _make = v.make;
+      _model = v.model;
+      _fuel = v.fuelType;
+      _isPrimary = v.isPrimary;
+      _unit = 'km';
+    }
+  }
 
   @override
   void dispose() {
@@ -62,7 +107,9 @@ class _VehicleFormState extends State<VehicleForm> {
     super.dispose();
   }
 
-  // Validators
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Validadores
+  // ─────────────────────────────────────────────────────────────────────────────
   String? _required(String? v) =>
       (v == null || v.trim().isEmpty) ? 'Required' : null;
 
@@ -84,11 +131,14 @@ class _VehicleFormState extends State<VehicleForm> {
   }
 
   String? _validateVIN(String? v) {
-    if (v == null || v.isEmpty) return null; // optional
+    if (v == null || v.isEmpty) return null; // opcional
     final ok = RegExp(r'^[A-HJ-NPR-Z0-9]{17}$').hasMatch(v.toUpperCase());
     return ok ? null : 'VIN must be 17 chars (no I,O,Q)';
   }
 
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Lógica de color
+  // ─────────────────────────────────────────────────────────────────────────────
   Future<void> _pickColor() async {
     final c = await showDialog<Color>(
       context: context,
@@ -100,18 +150,20 @@ class _VehicleFormState extends State<VehicleForm> {
             spacing: 12,
             runSpacing: 12,
             children: _colorOptions
-                .map((color) => GestureDetector(
-              onTap: () => Navigator.pop(context, color),
-              child: Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.black12),
+                .map(
+                  (color) => GestureDetector(
+                onTap: () => Navigator.pop(context, color),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.black12),
+                  ),
                 ),
               ),
-            ))
+            )
                 .toList(),
           ),
         ),
@@ -123,6 +175,7 @@ class _VehicleFormState extends State<VehicleForm> {
         ],
       ),
     );
+
     if (c != null) {
       setState(() => _colorCtrl.text = _colorName(c));
     }
@@ -140,11 +193,18 @@ class _VehicleFormState extends State<VehicleForm> {
     return 'Custom';
   }
 
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Guardar formulario (crear o actualizar)
+  // ─────────────────────────────────────────────────────────────────────────────
   void _save() {
     final ok = _formKey.currentState?.validate() ?? false;
     if (!ok) return;
 
-    final id = 'VH-${(MockVehicleData.vehicles.length + 1).toString().padLeft(3, '0')}';
+    // Si se edita, se usa el mismo id; si no, se genera uno nuevo.
+    final String id = widget.isEditing
+        ? widget.initialVehicle!.id
+        : 'VH-${(MockVehicleData.vehicles.length + 1).toString().padLeft(3, '0')}';
+
     final model = VehicleModel(
       id: id,
       make: _make!,
@@ -152,44 +212,66 @@ class _VehicleFormState extends State<VehicleForm> {
       year: int.parse(_yearCtrl.text),
       color: _colorCtrl.text.isEmpty ? 'Black' : _colorCtrl.text,
       licensePlate: _plateCtrl.text.trim().toUpperCase(),
-      vin: _vinCtrl.text.trim().isEmpty ? null : _vinCtrl.text.trim().toUpperCase(),
+      vin: _vinCtrl.text.trim().isEmpty
+          ? null
+          : _vinCtrl.text.trim().toUpperCase(),
       mileage: double.tryParse(_odometerCtrl.text.replaceAll(',', '')) ?? 0,
       fuelType: _fuel,
-      nickname: _nicknameCtrl.text.trim().isEmpty ? null : _nicknameCtrl.text.trim(),
+      nickname:
+      _nicknameCtrl.text.trim().isEmpty ? null : _nicknameCtrl.text.trim(),
       isPrimary: _isPrimary,
-      imageUrl:
-      'https://images.unsplash.com/photo-1549923746-c502d488b3ea?q=80&w=800&auto=format&fit=crop',
+      imageUrl: widget.initialVehicle?.imageUrl ??
+          'https://images.unsplash.com/photo-1549923746-c502d488b3ea?q=80&w=800&auto=format&fit=crop',
     );
 
-    // Persist in mock
+    // Si marcamos este vehículo como "principal", desmarcamos los demás.
     if (_isPrimary) {
       for (final v in MockVehicleData.vehicles) {
         final idx = MockVehicleData.vehicles.indexOf(v);
-        MockVehicleData.vehicles[idx] =
-            VehicleModel(
-              id: v.id,
-              make: v.make,
-              model: v.model,
-              year: v.year,
-              color: v.color,
-              licensePlate: v.licensePlate,
-              vin: v.vin,
-              mileage: v.mileage,
-              fuelType: v.fuelType,
-              nickname: v.nickname,
-              isPrimary: false,
-              imageUrl: v.imageUrl,
-            );
+        MockVehicleData.vehicles[idx] = VehicleModel(
+          id: v.id,
+          make: v.make,
+          model: v.model,
+          year: v.year,
+          color: v.color,
+          licensePlate: v.licensePlate,
+          vin: v.vin,
+          mileage: v.mileage,
+          fuelType: v.fuelType,
+          nickname: v.nickname,
+          isPrimary: v.id == model.id,
+          imageUrl: v.imageUrl,
+        );
       }
     }
-    MockVehicleData.add(model);
+
+    if (widget.isEditing) {
+      // Actualizar un vehículo existente
+      final idx = MockVehicleData.vehicles.indexWhere((v) => v.id == model.id);
+      if (idx >= 0) {
+        MockVehicleData.vehicles[idx] = model;
+      }
+    } else {
+      // Agregar nuevo vehículo
+      MockVehicleData.add(model);
+    }
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Vehicle saved successfully')),
+      SnackBar(
+        content: Text(
+          widget.isEditing
+              ? 'Vehicle updated successfully'
+              : 'Vehicle saved successfully',
+        ),
+      ),
     );
-    Navigator.of(context).pop(); // vuelve a la lista
+
+    Navigator.of(context).pop(); // volver a la lista
   }
 
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Build
+  // ─────────────────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -226,13 +308,18 @@ class _VehicleFormState extends State<VehicleForm> {
                           hintText: 'Select Make',
                         ),
                         items: _makesModels.keys
-                            .map((m) => DropdownMenuItem(value: m, child: Text(m)))
+                            .map<DropdownMenuItem<String>>(
+                              (m) => DropdownMenuItem<String>(
+                            value: m,
+                            child: Text(m),
+                          ),
+                        )
                             .toList(),
                         validator: (v) => v == null ? 'Required' : null,
                         onChanged: (v) {
                           setState(() {
                             _make = v;
-                            _model = null; // reset model
+                            _model = null; // al cambiar marca, reseteamos modelo
                           });
                         },
                       ),
@@ -249,7 +336,12 @@ class _VehicleFormState extends State<VehicleForm> {
                         items: (_make == null
                             ? <String>[]
                             : _makesModels[_make] ?? const <String>[])
-                            .map((m) => DropdownMenuItem(value: m, child: Text(m)))
+                            .map<DropdownMenuItem<String>>(
+                              (m) => DropdownMenuItem<String>(
+                            value: m,
+                            child: Text(m),
+                          ),
+                        )
                             .toList(),
                         validator: (v) => v == null ? 'Required' : null,
                         onChanged: (v) => setState(() => _model = v),
@@ -266,7 +358,9 @@ class _VehicleFormState extends State<VehicleForm> {
                       child: TextFormField(
                         controller: _yearCtrl,
                         keyboardType: TextInputType.number,
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
                         decoration: const InputDecoration(
                           labelText: 'Model Year*',
                           hintText: 'e.g., 2023',
@@ -292,7 +386,7 @@ class _VehicleFormState extends State<VehicleForm> {
                 ),
                 const SizedBox(height: 12),
 
-                // Odometer + unit
+                // Odometer + unidad
                 Row(
                   children: [
                     Expanded(
@@ -314,12 +408,20 @@ class _VehicleFormState extends State<VehicleForm> {
                     Expanded(
                       child: DropdownButtonFormField<String>(
                         value: _unit,
-                        decoration: const InputDecoration(labelText: 'Unit'),
+                        decoration:
+                        const InputDecoration(labelText: 'Unit'),
                         items: const [
-                          DropdownMenuItem(value: 'km', child: Text('km')),
-                          DropdownMenuItem(value: 'mi', child: Text('mi')),
+                          DropdownMenuItem(
+                            value: 'km',
+                            child: Text('km'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'mi',
+                            child: Text('mi'),
+                          ),
                         ],
-                        onChanged: (v) => setState(() => _unit = v ?? 'km'),
+                        onChanged: (v) =>
+                            setState(() => _unit = v ?? 'km'),
                       ),
                     ),
                   ],
@@ -329,14 +431,21 @@ class _VehicleFormState extends State<VehicleForm> {
                 // Fuel Type
                 DropdownButtonFormField<FuelType>(
                   value: _fuel,
-                  decoration: const InputDecoration(labelText: 'Fuel Type*'),
+                  decoration:
+                  const InputDecoration(labelText: 'Fuel Type*'),
                   items: FuelType.values
-                      .map((f) => DropdownMenuItem(
-                    value: f,
-                    child: Text(f.name[0].toUpperCase() + f.name.substring(1)),
-                  ))
+                      .map<DropdownMenuItem<FuelType>>(
+                        (f) => DropdownMenuItem<FuelType>(
+                      value: f,
+                      child: Text(
+                        f.name[0].toUpperCase() + f.name.substring(1),
+                      ),
+                    ),
+                  )
                       .toList(),
-                  onChanged: (v) => setState(() => _fuel = v ?? FuelType.gas),
+                  onChanged: (v) => setState(() {
+                    _fuel = v ?? FuelType.gas;
+                  }),
                 ),
               ],
             ),
@@ -370,7 +479,7 @@ class _VehicleFormState extends State<VehicleForm> {
                 ),
                 const SizedBox(height: 12),
 
-                // Set primary
+                // Set as primary vehicle
                 SwitchListTile.adaptive(
                   value: _isPrimary,
                   title: const Text('Set as primary vehicle'),
@@ -379,7 +488,7 @@ class _VehicleFormState extends State<VehicleForm> {
                 ),
                 const SizedBox(height: 12),
 
-                // Photos (placeholder)
+                // Photos (placeholder visual)
                 _uploadPlaceholder(),
                 const SizedBox(height: 12),
 
@@ -407,7 +516,7 @@ class _VehicleFormState extends State<VehicleForm> {
                 foregroundColor: AppColors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),
-              child: const Text('Save Vehicle'),
+              child: Text(widget.isEditing ? 'Save Changes' : 'Save Vehicle'),
             ),
           ),
           const SizedBox(height: 8),
@@ -416,10 +525,15 @@ class _VehicleFormState extends State<VehicleForm> {
     );
   }
 
-  // UI helpers
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Helpers de UI
+  // ─────────────────────────────────────────────────────────────────────────────
   Widget _sectionTitle(String text) => Text(
     text,
-    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+    style: const TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w700,
+    ),
   );
 
   Widget _card({required Widget child}) {
@@ -456,8 +570,10 @@ class _VehicleFormState extends State<VehicleForm> {
             Icon(Icons.camera_alt_outlined, size: 28),
             SizedBox(height: 8),
             Text('Upload a file or drag and drop'),
-            Text('PNG, JPG up to 5MB',
-                style: TextStyle(fontSize: 12, color: Colors.grey)),
+            Text(
+              'PNG, JPG up to 5MB',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
           ],
         ),
       ),
@@ -465,7 +581,7 @@ class _VehicleFormState extends State<VehicleForm> {
   }
 }
 
-/// Simple dotted border (tiny inline replacement to avoid extra package)
+
 class DottedBorder extends StatelessWidget {
   final Widget child;
   final Color color;

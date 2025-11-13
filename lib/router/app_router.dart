@@ -17,6 +17,11 @@ import 'package:safecar_mobile_app/vehicle_management/presentation/view/add_vehi
 import 'package:safecar_mobile_app/vehicle_management/presentation/view/vehicle_details_page.dart';
 import 'package:safecar_mobile_app/vehicle_management/vehicle_routes.dart';
 
+import 'package:safecar_mobile_app/vehicle_management/presentation/view/edit_vehicle_page.dart';
+
+
+
+
 /// Main router configuration for SafeCar Mobile App
 final GoRouter appRouter = GoRouter(
   initialLocation: AppRoutes.workshop,
@@ -27,25 +32,34 @@ final GoRouter appRouter = GoRouter(
         return MainLayout(navigationShell: navigationShell);
       },
       branches: [
-        // 🚗 Branch 1: Vehicle Management
+        // Branch 1: Vehicle Management
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: VehiclePaths.vehicles,                // '/vehicles'
-              name: VehicleRouteNames.vehicles,           // 'vehicles'
+              path: VehiclePaths.vehicles,
+              name: VehicleRouteNames.vehicles,
               builder: (context, state) => const VehiclesPage(),
               routes: [
                 GoRoute(
-                  path: VehiclePaths.vehicleAdd,          // 'add' -> '/vehicles/add'
-                  name: VehicleRouteNames.vehicleAdd,     // 'vehicle-add'
+                  path: VehiclePaths.vehicleAdd,
+                  name: VehicleRouteNames.vehicleAdd,
                   builder: (context, state) => const AddVehiclePage(),
                 ),
                 GoRoute(
-                  path: VehiclePaths.vehicleDetails,      // ':id' -> '/vehicles/:id'
-                  name: VehicleRouteNames.vehicleDetails, // 'vehicle-details'
+                  path: VehiclePaths.vehicleDetails,
+                  name: VehicleRouteNames.vehicleDetails,
                   builder: (context, state) {
                     final id = state.pathParameters['id']!;
                     return VehicleDetailsPage(vehicleId: id);
+                  },
+                ),
+
+                GoRoute(
+                  path: VehiclePaths.vehicleEdit,         // ':id/edit'
+                  name: VehicleRouteNames.vehicleEdit,    // 'vehicle-edit'
+                  builder: (context, state) {
+                    final id = state.pathParameters['id']!;
+                    return EditVehiclePage(vehicleId: id);
                   },
                 ),
               ],
@@ -53,7 +67,7 @@ final GoRouter appRouter = GoRouter(
           ],
         ),
 
-        // 📋 Branch 2: Status
+        // Branch 2: Status
         StatefulShellBranch(
           routes: [
             GoRoute(

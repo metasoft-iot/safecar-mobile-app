@@ -1,15 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:safecar_mobile_app/shared/theme/app_colors.dart';
-import '../../../vehicle_management/domain/model/vehicle_model.dart';
+import 'package:safecar_mobile_app/vehicle_management/domain/model/vehicle_model.dart';
 
+/// Tarjeta de vehículo utilizada en la lista de "My Vehicles"
+/// Soporta acciones:
+/// - tap en la tarjeta [onTap]
+/// - ver detalles [onViewDetails]
+/// - editar [onEdit]
+/// - eliminar [onDelete]
 class VehicleCard extends StatelessWidget {
   final VehicleModel vehicle;
+
   final VoidCallback? onTap;
+  final VoidCallback? onViewDetails;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   const VehicleCard({
     super.key,
     required this.vehicle,
     this.onTap,
+    this.onViewDetails,
+    this.onEdit,
+    this.onDelete,
   });
 
   @override
@@ -25,14 +38,14 @@ class VehicleCard extends StatelessWidget {
               color: Colors.black.withOpacity(0.05),
               blurRadius: 6,
               offset: const Offset(0, 3),
-            )
+            ),
           ],
         ),
         padding: const EdgeInsets.all(12),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // IMAGE
+            // Imagen del vehículo
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.network(
@@ -51,13 +64,14 @@ class VehicleCard extends StatelessWidget {
 
             const SizedBox(width: 12),
 
-            // TEXTS
+            // Texto y menú
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
+                      // Marca + modelo
                       Expanded(
                         child: Text(
                           '${vehicle.make} ${vehicle.model}',
@@ -68,22 +82,28 @@ class VehicleCard extends StatelessWidget {
                         ),
                       ),
 
-                      // MENU BUTTON
+                      // Menú de 3 puntos
                       PopupMenuButton<String>(
                         icon: const Icon(Icons.more_vert),
                         onSelected: (value) {
-                          // TODO: implementar "edit" o "delete"
+                          if (value == 'details' && onViewDetails != null) {
+                            onViewDetails!();
+                          } else if (value == 'edit' && onEdit != null) {
+                            onEdit!();
+                          } else if (value == 'delete' && onDelete != null) {
+                            onDelete!();
+                          }
                         },
-                        itemBuilder: (context) => [
-                          const PopupMenuItem(
+                        itemBuilder: (context) => const [
+                          PopupMenuItem(
                             value: 'details',
                             child: Text('View details'),
                           ),
-                          const PopupMenuItem(
+                          PopupMenuItem(
                             value: 'edit',
                             child: Text('Edit vehicle'),
                           ),
-                          const PopupMenuItem(
+                          PopupMenuItem(
                             value: 'delete',
                             child: Text('Delete'),
                           ),
@@ -94,6 +114,7 @@ class VehicleCard extends StatelessWidget {
 
                   const SizedBox(height: 4),
 
+                  // Año
                   Text(
                     '${vehicle.year}',
                     style: TextStyle(
@@ -102,11 +123,14 @@ class VehicleCard extends StatelessWidget {
                     ),
                   ),
 
+                  // Badge "Default" si es el vehículo principal
                   if (vehicle.isPrimary) ...[
                     const SizedBox(height: 6),
                     Container(
-                      padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.success.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(12),
@@ -119,8 +143,8 @@ class VehicleCard extends StatelessWidget {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                    )
-                  ]
+                    ),
+                  ],
                 ],
               ),
             ),
