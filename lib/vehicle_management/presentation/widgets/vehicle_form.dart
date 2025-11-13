@@ -4,6 +4,7 @@ import 'package:safecar_mobile_app/shared/theme/app_colors.dart';
 import 'package:safecar_mobile_app/vehicle_management/domain/model/vehicle_model.dart';
 import 'package:safecar_mobile_app/vehicle_management/infrastructure/mock_vehicle_data.dart';
 
+
 /// Formulario reutilizable para:
 /// - Crear un nuevo vehículo
 /// - Editar un vehículo existente (cuando se pasa [initialVehicle])
@@ -94,6 +95,7 @@ class _VehicleFormState extends State<VehicleForm> {
       _unit = 'km';
     }
   }
+
 
   @override
   void dispose() {
@@ -196,12 +198,15 @@ class _VehicleFormState extends State<VehicleForm> {
   // ─────────────────────────────────────────────────────────────────────────────
   // Guardar formulario (crear o actualizar)
   // ─────────────────────────────────────────────────────────────────────────────
+
   void _save() {
     final ok = _formKey.currentState?.validate() ?? false;
     if (!ok) return;
 
-    // Si se edita, se usa el mismo id; si no, se genera uno nuevo.
-    final String id = widget.isEditing
+    final isEditing = widget.initialVehicle != null;
+
+
+    final String id = isEditing
         ? widget.initialVehicle!.id
         : 'VH-${(MockVehicleData.vehicles.length + 1).toString().padLeft(3, '0')}';
 
@@ -217,18 +222,20 @@ class _VehicleFormState extends State<VehicleForm> {
           : _vinCtrl.text.trim().toUpperCase(),
       mileage: double.tryParse(_odometerCtrl.text.replaceAll(',', '')) ?? 0,
       fuelType: _fuel,
-      nickname:
-      _nicknameCtrl.text.trim().isEmpty ? null : _nicknameCtrl.text.trim(),
+      nickname: _nicknameCtrl.text.trim().isEmpty
+          ? null
+          : _nicknameCtrl.text.trim(),
       isPrimary: _isPrimary,
+
       imageUrl: widget.initialVehicle?.imageUrl ??
-          'https://images.unsplash.com/photo-1549923746-c502d488b3ea?q=80&w=800&auto=format&fit=crop',
+          'https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg',
     );
 
-    // Si marcamos este vehículo como "principal", desmarcamos los demás.
+
     if (_isPrimary) {
-      for (final v in MockVehicleData.vehicles) {
-        final idx = MockVehicleData.vehicles.indexOf(v);
-        MockVehicleData.vehicles[idx] = VehicleModel(
+      for (var i = 0; i < MockVehicleData.vehicles.length; i++) {
+        final v = MockVehicleData.vehicles[i];
+        MockVehicleData.vehicles[i] = VehicleModel(
           id: v.id,
           make: v.make,
           model: v.model,
@@ -239,35 +246,37 @@ class _VehicleFormState extends State<VehicleForm> {
           mileage: v.mileage,
           fuelType: v.fuelType,
           nickname: v.nickname,
-          isPrimary: v.id == model.id,
+          isPrimary: v.id == id, // solo este queda en true
           imageUrl: v.imageUrl,
         );
       }
     }
 
-    if (widget.isEditing) {
-      // Actualizar un vehículo existente
-      final idx = MockVehicleData.vehicles.indexWhere((v) => v.id == model.id);
-      if (idx >= 0) {
+    if (isEditing) {
+      // 🔁 actualizar en la lista
+      final idx =
+      MockVehicleData.vehicles.indexWhere((v) => v.id == id);
+      if (idx != -1) {
         MockVehicleData.vehicles[idx] = model;
       }
     } else {
-      // Agregar nuevo vehículo
+      // ➕ agregar nuevo
       MockVehicleData.add(model);
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          widget.isEditing
+          isEditing
               ? 'Vehicle updated successfully'
               : 'Vehicle saved successfully',
         ),
       ),
     );
 
-    Navigator.of(context).pop(); // volver a la lista
+    Navigator.of(context).pop(); // volvemos a la lista
   }
+
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Build

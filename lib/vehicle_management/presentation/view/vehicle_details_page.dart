@@ -5,6 +5,9 @@ import 'package:safecar_mobile_app/vehicle_management/domain/model/vehicle_model
 import 'package:safecar_mobile_app/vehicle_management/infrastructure/in_memory_vehicle_repository.dart';
 import 'package:safecar_mobile_app/vehicle_management/presentation/widgets/delete_vehicle_dialog.dart';
 
+import 'package:go_router/go_router.dart';
+import 'package:safecar_mobile_app/vehicle_management/vehicle_routes.dart';
+
 class VehicleDetailsPage extends StatefulWidget {
   final String vehicleId;
   const VehicleDetailsPage({super.key, required this.vehicleId});
@@ -50,7 +53,7 @@ class _VehicleDetailsPageState extends State<VehicleDetailsPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Vehicle deleted')),
       );
-      Navigator.of(context).pop(); // vuelve a la lista
+      Navigator.of(context).pop();
     }
   }
 
@@ -67,11 +70,21 @@ class _VehicleDetailsPageState extends State<VehicleDetailsPage> {
         ),
         actions: [
           IconButton(
-            onPressed: () {/* TODO: Navegar a editar */},
+            onPressed: () async {
+              if (_vehicle == null) return;
+
+              await context.pushNamed(
+                VehicleRouteNames.vehicleEdit,
+                pathParameters: {'id': _vehicle!.id},
+              );
+
+              _load();
+            },
             icon: const Icon(Icons.edit, color: AppColors.white),
             tooltip: 'Edit',
           )
         ],
+
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
