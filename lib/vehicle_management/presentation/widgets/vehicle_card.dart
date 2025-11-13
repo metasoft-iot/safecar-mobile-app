@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:safecar_mobile_app/vehicle_management/domain/model/vehicle_model.dart';
 import 'package:safecar_mobile_app/shared/theme/app_colors.dart';
+import '../../../vehicle_management/domain/model/vehicle_model.dart';
 
 class VehicleCard extends StatelessWidget {
   final VehicleModel vehicle;
@@ -14,50 +14,118 @@ class VehicleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: AppColors.white,
-      child: ListTile(
-        onTap: onTap,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        leading: SizedBox(
-          width: 56,
-          height: 56,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.network(
-              vehicle.imageUrl,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Image.asset(
-                'assets/images/vehicle_placeholder.png',
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 6,
+              offset: const Offset(0, 3),
+            )
+          ],
+        ),
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // IMAGE
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                vehicle.imageUrl,
+                width: 80,
+                height: 80,
                 fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Image.asset(
+                  'assets/images/vehicle_placeholder.png',
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
-          ),
-        ),
-        title: Text(
-          '${vehicle.make} ${vehicle.model}',
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-        subtitle: Text('${vehicle.year} • ${vehicle.fuelType.name}'),
-        trailing: vehicle.isPrimary
-            ? Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: AppColors.appointmentConfirmed.withOpacity(0.15),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: const Text(
-            'Default',
-            style: TextStyle(
-              color: AppColors.appointmentConfirmed,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
+
+            const SizedBox(width: 12),
+
+            // TEXTS
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${vehicle.make} ${vehicle.model}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+
+                      // MENU BUTTON
+                      PopupMenuButton<String>(
+                        icon: const Icon(Icons.more_vert),
+                        onSelected: (value) {
+                          // TODO: implementar "edit" o "delete"
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'details',
+                            child: Text('View details'),
+                          ),
+                          const PopupMenuItem(
+                            value: 'edit',
+                            child: Text('Edit vehicle'),
+                          ),
+                          const PopupMenuItem(
+                            value: 'delete',
+                            child: Text('Delete'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 4),
+
+                  Text(
+                    '${vehicle.year}',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 13,
+                    ),
+                  ),
+
+                  if (vehicle.isPrimary) ...[
+                    const SizedBox(height: 6),
+                    Container(
+                      padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.success.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        'Default',
+                        style: TextStyle(
+                          color: AppColors.success,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    )
+                  ]
+                ],
+              ),
             ),
-          ),
-        )
-            : null,
+          ],
+        ),
       ),
     );
   }
