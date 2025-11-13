@@ -9,10 +9,10 @@ import 'package:safecar_mobile_app/src/iam/application/use_cases/logout_use_case
 import 'package:safecar_mobile_app/src/iam/application/use_cases/register_use_case.dart';
 import 'package:safecar_mobile_app/src/iam/infrastructure/config/dio_client.dart'; // Asegúrate que esta ruta sea correcta
 import 'package:safecar_mobile_app/src/iam/infrastructure/datasources/auth_remote_datasource.dart';
+import 'package:safecar_mobile_app/src/iam/infrastructure/datasources/profile_remote_datasource.dart';
 import 'package:safecar_mobile_app/src/iam/infrastructure/repositories/auth_repository_impl.dart';
 
 void main() {
-  // Opcional: inicializar bindings si haces algo async antes de runApp
   WidgetsFlutterBinding.ensureInitialized();
 
   runApp(const AppState());
@@ -23,58 +23,43 @@ class AppState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    // 1. PROVEER LOS REPOSITORIOS (Y SUS DEPENDENCIAS)
     return MultiRepositoryProvider(
       providers: [
-
-        // Proveemos la implementación de AuthRepository
         RepositoryProvider<AuthRepository>(
           create: (context) {
-            // Aquí instanciamos toda la cadena de dependencias
-            final dio = DioClient().dio; // Tu instancia de Dio
-            final dataSource = AuthRemoteDataSource(dio);
+
+            final dio = DioClient().dio;
             final sessionService = SessionService();
 
+            final authDataSource = AuthRemoteDataSource(dio);
+            final profileDataSource =  ProfileRemoteDataSource(dio); // <-- Nuevo
+
             return AuthRepositoryImpl(
-              remoteDataSource: dataSource,
+              authRemoteDataSource: authDataSource,
+              profileRemoteDataSource: profileDataSource, // <-- Nuevo
               sessionService: sessionService,
             );
           },
         ),
-
-        // ... aquí podrías proveer otros repositorios (ej. VehicleRepository)
-
+        // ... (otros repositorios)
       ],
-
-      // 2. PROVEER LOS BLOCS
       child: MultiBlocProvider(
         providers: [
-
           BlocProvider<AuthBloc>(
             create: (context) {
-              // Pedimos el AuthRepository al contexto
               final authRepository = context.read<AuthRepository>();
 
-              // Creamos los Casos de Uso pasándole el repositorio
-              final loginUseCase = LoginUseCase(authRepository);
-              final registerUseCase = RegisterUseCase(authRepository);
-              final logoutUseCase = LogoutUseCase(authRepository);
-
-              // Creamos el BLoC
+              // Esto no cambia, BLoC no necesita saber sobre los datasources
               return AuthBloc(
-                loginUseCase: loginUseCase,
-                registerUseCase: registerUseCase,
-                logoutUseCase: logoutUseCase,
+                loginUseCase: LoginUseCase(authRepository),
+                registerUseCase: RegisterUseCase(authRepository),
+                logoutUseCase: LogoutUseCase(authRepository),
               );
-              // ..add(CheckInitialAuthStatus());
             },
           ),
-
-          // ... aquí proveerías otros BLoCs (ProfileBloc, etc.)
-
+          // ... (otros blocs)
         ],
-        child: const MainApp(), // 3. Tu aplicación (que ahora está adentro)
+        child: const MainApp(),
       ),
     );
   }
