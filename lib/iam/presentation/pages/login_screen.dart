@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../application/blocs/auth_bloc.dart';
 import '../../application/blocs/auth_event.dart';
 import '../../application/blocs/auth_state.dart';
+import 'package:safecar_mobile_app/router/route_constants.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -14,7 +15,6 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  // 2. Controladores para los text fields
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -27,9 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _submitLogin() {
-    // 3. Validar el formulario
     if (_formKey.currentState!.validate()) {
-      // 4. Enviar el evento al BLoC
       context.read<AuthBloc>().add(
         LoginRequested(
           email: _emailController.text,
@@ -45,6 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: const Color(0xFF333366),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
+          // ✅ Error: snackbar rojo
           if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -52,6 +51,19 @@ class _LoginScreenState extends State<LoginScreen> {
                 backgroundColor: Colors.red,
               ),
             );
+          }
+
+          // ✅ Login exitoso: navegar a /vehicles
+          if (state is Authenticated) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Login successful!'),
+                backgroundColor: Colors.green,
+              ),
+            );
+
+            // navega a la pantalla de vehículos
+            context.go(AppRoutes.vehicles);
           }
         },
         child: Form(
@@ -83,7 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(24.0),
-                    child: SingleChildScrollView( // Añadido para evitar overflow
+                    child: SingleChildScrollView(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
@@ -98,7 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           const SizedBox(height: 32),
                           const Text('Email'),
                           const SizedBox(height: 8),
-                          TextFormField( // 6. Cambiado a TextFormField
+                          TextFormField(
                             controller: _emailController,
                             decoration: InputDecoration(
                               hintText: 'you@example.com',
@@ -109,7 +121,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 borderSide: BorderSide.none,
                               ),
                             ),
-                            validator: (value) { // 7. Añadida validación
+                            validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Please enter your email';
                               }
@@ -122,7 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           const SizedBox(height: 16),
                           const Text('Password'),
                           const SizedBox(height: 8),
-                          TextFormField( // 6. Cambiado a TextFormField
+                          TextFormField(
                             controller: _passwordController,
                             obscureText: true,
                             decoration: InputDecoration(
@@ -135,7 +147,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               suffixIcon: const Icon(Icons.visibility),
                             ),
-                            validator: (value) { // 7. Añadida validación
+                            validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Please enter your password';
                               }
@@ -151,7 +163,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                           const SizedBox(height: 24),
-                          // 8. BlocBuilder para mostrar estado de carga
                           BlocBuilder<AuthBloc, AuthState>(
                             builder: (context, state) {
                               if (state is AuthLoading) {
@@ -160,11 +171,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                 );
                               }
                               return ElevatedButton(
-                                onPressed: _submitLogin, // 9. Llamar a la función
+                                onPressed: _submitLogin,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF9999CC),
-                                  padding:
-                                  const EdgeInsets.symmetric(vertical: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 16),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),
                                   ),
@@ -180,8 +191,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           const SizedBox(height: 16),
                           TextButton(
                             onPressed: () => context.go('/register'),
-                            child:
-                            const Text('Don\'t have an account? Sign up'),
+                            child: const Text(
+                              'Don\'t have an account? Sign up',
+                            ),
                           ),
                         ],
                       ),

@@ -1,8 +1,3 @@
-import 'package:json_annotation/json_annotation.dart';
-
-part 'profile_response_model.g.dart';
-
-@JsonSerializable()
 class ProfileResponseModel {
   final int profileId;
   final String fullName;
@@ -10,7 +5,7 @@ class ProfileResponseModel {
   final String country;
   final String phone;
   final String dni;
-  final String? companyName; // Puede ser nulo
+  final String? companyName;
   final List<String> specializations;
   final int yearsOfExperience;
 
@@ -26,6 +21,19 @@ class ProfileResponseModel {
     required this.yearsOfExperience,
   });
 
-  factory ProfileResponseModel.fromJson(Map<String, dynamic> json) =>
-      _$ProfileResponseModelFromJson(json);
+  factory ProfileResponseModel.fromJson(Map<String, dynamic> json) {
+    return ProfileResponseModel(
+      profileId: json['profileId'] ?? 0,
+      fullName: json['fullName'] ?? '',
+      city: json['city'] ?? '',
+      country: json['country'] ?? '',
+      phone: json['phone'] ?? '',
+      dni: json['dni'] ?? '',
+      companyName: json['companyName'],
+      specializations: json['specializations'] != null
+          ? List<String>.from(json['specializations'])
+          : [],
+      yearsOfExperience: json['yearsOfExperience'] ?? 0,
+    );
+  }
 }

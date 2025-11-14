@@ -1,4 +1,3 @@
-
 import '../../application/services/session_service.dart';
 import '../../domain/entities/auth_credentials.dart';
 import '../../domain/entities/user.dart';
@@ -10,7 +9,6 @@ import '../models/login_request_model.dart';
 import '../models/register_request_model.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-
   final AuthRemoteDataSource authRemoteDataSource;
   final ProfileRemoteDataSource profileRemoteDataSource;
   final SessionService sessionService;
@@ -23,23 +21,24 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<AuthCredentials> login(String email, String password) async {
-    final requestModel = LoginRequestModel(email: email, password: password);
-    final responseModel = await authRemoteDataSource.login(requestModel);
+    final req = LoginRequestModel(email: email, password: password);
+    final res = await authRemoteDataSource.login(req);
 
-    final userEntity = User(
-      id: responseModel.id,
-      username: responseModel.username,
+    final user = User(
+      id: res.id,
       email: email,
-      roles: [],
+      username: res.username,
+      roles: const [], // si luego quieres roles, se pueden mapear aquí
     );
 
-    final credentialsEntity = AuthCredentials(
-      token: responseModel.token,
-      user: userEntity,
+    final credentials = AuthCredentials(
+      token: res.token,
+      user: user,
     );
 
-    await sessionService.saveToken(credentialsEntity.token);
-    return credentialsEntity;
+    await sessionService.saveToken(credentials.token);
+
+    return credentials;
   }
 
   @override
@@ -54,36 +53,50 @@ class AuthRepositoryImpl implements AuthRepository {
     required String phone,
     required String dni,
   }) async {
-
-    final authRequestModel = RegisterRequestModel( // <-- Se define 'authRequestModel'
+    // 1) Sign-up
+    final regReq = RegisterRequestModel(
       email: email,
       password: password,
       confirmPassword: confirmPassword,
       roles: roles,
     );
+    final regRes = await authRemoteDataSource.register(regReq);
 
-    final authResponseModel = await authRemoteDataSource.register(authRequestModel);
-    final int userId = authResponseModel.id;
+    // 2) Sign-in para obtener token
+    final loginReq = LoginRequestModel(email: email, password: password);
+    final loginRes = await authRemoteDataSource.login(loginReq);
 
-    final profileRequestModel = CreateProfileRequestModel(
+    final user = User(
+      id: loginRes.id,
+      email: email,
+      username: loginRes.username,
+      roles: regRes.roles,
+    );
+
+    final credentials = AuthCredentials(
+      token: loginRes.token,
+      user: user,
+    );
+
+    // 3) Guardar token en sesión
+    await sessionService.saveToken(credentials.token);
+
+    // 4) Crear perfil usando el token
+    final profileReq = CreateProfileRequestModel(
       fullName: fullName,
       city: city,
       country: country,
       phone: phone,
       dni: dni,
     );
+
     await profileRemoteDataSource.createProfile(
       userEmail: email,
-      profileData: profileRequestModel,
+      profileData: profileReq,
+      bearerToken: credentials.token,
     );
 
-    final userEntity = User(
-      id: authResponseModel.id,
-      email: authResponseModel.email,
-      username: '',
-      roles: authResponseModel.roles,
-    );
-    return userEntity;
+    return user;
   }
 
   @override

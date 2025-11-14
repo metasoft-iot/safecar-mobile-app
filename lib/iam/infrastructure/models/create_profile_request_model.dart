@@ -1,8 +1,3 @@
-import 'package:json_annotation/json_annotation.dart';
-
-part 'create_profile_request_model.g.dart';
-
-@JsonSerializable()
 class CreateProfileRequestModel {
   final String fullName;
   final String city;
@@ -18,5 +13,13 @@ class CreateProfileRequestModel {
     required this.dni,
   });
 
-  Map<String, dynamic> toJson() => _$CreateProfileRequestModelToJson(this);
+  Map<String, dynamic> toJson() {
+    return {
+      'fullName': fullName,
+      'city': city,
+      'country': country,
+      'phone': phone,
+      'dni': dni,
+    };
+  }
 }
