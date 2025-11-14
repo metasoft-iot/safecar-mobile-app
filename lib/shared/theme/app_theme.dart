@@ -64,7 +64,6 @@ class AppTheme {
           color: AppColors.white,
           fontWeight: FontWeight.w600,
         ),
-        iconTheme: const IconThemeData(color: AppColors.white),
       ),
 
       // Tema de los botones elevados
@@ -77,7 +76,6 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
 
@@ -86,7 +84,6 @@ class AppTheme {
         color: cardBackgroundColor,
         elevation: 2,
         shadowColor: AppColors.black.withValues(alpha: 0.1),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       ),
     );
