@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:safecar_mobile_app/insights/presentation/views/vehicle_insights_page.dart';
 import 'package:safecar_mobile_app/router/route_constants.dart';
 import 'package:safecar_mobile_app/shared/presentation/pages/not_found_page.dart';
 import 'package:safecar_mobile_app/shared/presentation/pages/main_layout.dart';
@@ -35,11 +36,7 @@ final GoRouter appRouter = GoRouter(
           routes: [
             GoRoute(
               path: AppRoutes.status,
-              builder: (context, state) => _PlaceholderPage(
-                title: 'Status',
-                icon: Icons.format_list_bulleted,
-                color: AppColors.secondary,
-              ),
+              builder: (context, state) => const VehicleInsightsPage(),
             ),
           ],
         ),
