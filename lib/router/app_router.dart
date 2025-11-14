@@ -1,16 +1,22 @@
-
 import 'package:go_router/go_router.dart';
-import 'package:safecar_mobile_app/screens/add_vehicle/add_vehicle_screen.dart';
-import 'package:safecar_mobile_app/screens/dashboard/dashboard_screen.dart';
-import 'package:safecar_mobile_app/screens/login/login_screen.dart';
-import 'package:safecar_mobile_app/screens/my_vehicles/my_vehicles_screen.dart';
-import 'package:safecar_mobile_app/screens/register/register_screen.dart';
-import 'package:safecar_mobile_app/screens/vehicle_details/vehicle_details_screen.dart';
 
+// Auth
+import 'package:safecar_mobile_app/iam/presentation/pages/login_screen.dart';
+import 'package:safecar_mobile_app/iam/presentation/pages/register_screen.dart';
+
+// Vehicles
+import 'package:safecar_mobile_app/vehicle_management/presentation/view/vehicles_page.dart';
+import 'package:safecar_mobile_app/vehicle_management/presentation/view/vehicle_details_page.dart';
+import 'package:safecar_mobile_app/vehicle_management/presentation/view/add_vehicle_page.dart';
+
+// Rutas / constantes
+import 'package:safecar_mobile_app/router/route_constants.dart';
+import 'package:safecar_mobile_app/vehicle_management/vehicle_routes.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/login',
   routes: [
+    // ---------- AUTH ----------
     GoRoute(
       path: '/login',
       builder: (context, state) => const LoginScreen(),
@@ -19,21 +25,38 @@ final appRouter = GoRouter(
       path: '/register',
       builder: (context, state) => const RegisterScreen(),
     ),
+
+    // ---------- VEHICLES ----------
     GoRoute(
-      path: '/vehicles',
-      builder: (context, state) => const MyVehiclesScreen(),
+      path: AppRoutes.vehicles, // '/vehicles'
+      builder: (context, state) => const VehiclesPage(),
+      routes: [
+        // Detalle de vehículo  -> /vehicles/:id
+        GoRoute(
+          path: ':id',
+          name: VehicleRouteNames.vehicleDetails,
+          builder: (context, state) =>
+              VehicleDetailsPage(vehicleId: state.pathParameters['id']!),
+        ),
+
+        // Crear vehículo -> /vehicles/add
+        GoRoute(
+          path: 'add',
+          name: VehicleRouteNames.vehicleAdd,
+          builder: (context, state) => const AddVehiclePage(),
+        ),
+
+        // 👇 Aquí más adelante podemos añadir la ruta de edición
+        // GoRoute(
+        //   path: ':id/edit',
+        //   name: VehicleRouteNames.vehicleEdit,
+        //   builder: (context, state) => EditVehiclePage(...),
+        // ),
+      ],
     ),
-    GoRoute(
-      path: '/vehicles/:id',
-      builder: (context, state) => const VehicleDetailsScreen(),
-    ),
-    GoRoute(
-      path: '/add-vehicle',
-      builder: (context, state) => const AddVehicleScreen(),
-    ),
-    GoRoute(
-      path: '/dashboard',
-      builder: (context, state) => const DashboardScreen(),
-    ),
+
+    // 👇 Falta conectar Status, Workshop y Dashboard.
+    // Cuando me pases las pantallas correspondientes (p.ej. MainLayout,
+    // VehicleInsightsPage, AppointmentPage, etc.) las añadimos aquí.
   ],
 );
