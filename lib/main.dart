@@ -1,28 +1,70 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'features/auth/application/auth_bloc.dart';
-import 'features/auth/application/auth_event.dart';
-import 'features/appointments/application/appointments_bloc.dart';
-import 'features/auth/presentation/screens/sign_in_screen.dart';
-import 'features/auth/presentation/screens/sign_up_screen.dart';
-import 'features/home/presentation/screens/home_screen.dart';
+
+// Core
+import 'core/infrastructure/api_service.dart';
+
+// Auth Bounded Context
+import 'auth/application/auth_bloc.dart';
+import 'auth/application/auth_events.dart';
+import 'auth/presentation/screens/sign_in_screen.dart';
+import 'auth/presentation/screens/sign_up_screen.dart';
+
+// Vehicles Bounded Context
+import 'vehicles/application/vehicles_bloc.dart';
+
+// Workshops Bounded Context
+import 'workshops/application/workshops_bloc.dart';
+
+// Appointments Bounded Context
+import 'appointments/application/appointments_bloc.dart';
+
+// Dashboard Bounded Context
+import 'dashboard/application/dashboard_bloc.dart';
+
+// Home Screen (in core/presentation/screens)
+import 'core/presentation/screens/home_screen.dart';
 
 void main() {
   runApp(const SafeCarApp());
 }
 
+/// Main application widget with DDD architecture.
+/// Each bounded context has its own store following the pattern.
 class SafeCarApp extends StatelessWidget {
   const SafeCarApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Create shared ApiService instance
+    final apiService = ApiService();
+
     return MultiBlocProvider(
       providers: [
+        // Auth Store - Global provider for authentication
         BlocProvider(
-          create: (context) => AuthBloc()..add(const AuthInitializeRequested()),
+          create: (context) => AuthStore(apiService: apiService)
+            ..add(const AuthInitializeRequested()),
         ),
+        
+        // Vehicles Store
         BlocProvider(
-          create: (context) => AppointmentsBloc(),
+          create: (context) => VehiclesStore(apiService: apiService),
+        ),
+        
+        // Workshops Store
+        BlocProvider(
+          create: (context) => WorkshopsStore(apiService: apiService),
+        ),
+        
+        // Appointments Store
+        BlocProvider(
+          create: (context) => AppointmentsStore(apiService: apiService),
+        ),
+        
+        // Dashboard Store
+        BlocProvider(
+          create: (context) => DashboardStore(),
         ),
       ],
       child: MaterialApp(
