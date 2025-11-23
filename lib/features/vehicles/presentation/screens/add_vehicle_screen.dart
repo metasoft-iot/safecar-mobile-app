@@ -26,7 +26,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
   
   String? _selectedMake;
   String? _selectedModel;
-  Color _selectedColor = const Color(0xFF5C4FDB);
+  final Color _selectedColor = const Color(0xFF5C4FDB);
   String _odometerUnit = 'km';
   bool _isPrimaryVehicle = false;
   bool _isSubmitting = false;
@@ -236,7 +236,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                                     ),
                                     const SizedBox(height: 8),
                                     DropdownButtonFormField<String>(
-                                      value: _selectedMake,
+                                      initialValue: _selectedMake,
                                       decoration: InputDecoration(
                                         hintText: 'Select Make',
                                         border: OutlineInputBorder(
@@ -281,7 +281,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                                     ),
                                     const SizedBox(height: 8),
                                     DropdownButtonFormField<String>(
-                                      value: _selectedModel,
+                                      initialValue: _selectedModel,
                                       decoration: InputDecoration(
                                         hintText: 'Select Model',
                                         border: OutlineInputBorder(
@@ -511,7 +511,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                                     _isPrimaryVehicle = value;
                                   });
                                 },
-                                activeColor: const Color(0xFF5C4FDB),
+                                activeThumbColor: const Color(0xFF5C4FDB),
                               ),
                             ],
                           ),

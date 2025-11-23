@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../../core/services/vehicle_service.dart';
+import '../../../../core/services/insights_service.dart';
 
-/// Screen showing vehicle engine status, live metrics, and diagnostic trouble codes
+/// Screen showing vehicle insights with AI-powered recommendations
 class VehicleStatusScreen extends StatefulWidget {
   const VehicleStatusScreen({super.key});
 
@@ -11,43 +12,227 @@ class VehicleStatusScreen extends StatefulWidget {
 
 class _VehicleStatusScreenState extends State<VehicleStatusScreen> {
   final _vehicleService = VehicleService();
+  final _insightsService = InsightsService();
+  
   List<Map<String, dynamic>> _vehicles = [];
   String? _selectedVehicleId;
-  bool _isLoading = true;
+  Map<String, dynamic>? _selectedVehicle;
+  Map<String, dynamic>? _insights;
+  List<Map<String, dynamic>> _recentTelemetry = [];
   
-  // Example: Toggle between success and failed states
-  bool _hasIssues = false;
+  bool _isLoading = true;
+  bool _isGeneratingInsights = false;
 
   @override
   void initState() {
     super.initState();
-    _loadVehicles();
+    _loadData();
   }
   
-  Future<void> _loadVehicles() async {
+  Future<void> _loadData() async {
+    setState(() => _isLoading = true);
+    
     try {
+      // Load vehicles
       final vehicles = await _vehicleService.getVehicles();
       setState(() {
         _vehicles = vehicles;
-        _isLoading = false;
         if (_vehicles.isNotEmpty) {
-          _selectedVehicleId = _vehicles.first['id'];
+          _selectedVehicleId = _vehicles.first['id'].toString();
+          _selectedVehicle = _vehicles.first;
         }
       });
+      
+      // Load insights and telemetry for selected vehicle
+      if (_selectedVehicleId != null) {
+        await Future.wait([
+          _loadInsights(),
+          _loadTelemetry(),
+        ]);
+      }
     } catch (e) {
+      print('Error loading data: $e');
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+  
+  Future<void> _loadTelemetry() async {
+    if (_selectedVehicleId == null) return;
+    
+    try {
+      final telemetry = await _insightsService.getRecentTelemetry(
+        int.parse(_selectedVehicleId!),
+        limit: 5,
+      );
+      
       setState(() {
-        _isLoading = false;
+        _recentTelemetry = telemetry;
       });
-      print('Error loading vehicles: $e');
+    } catch (e) {
+      print('Error loading telemetry: $e');
+    }
+  }
+  
+  Future<void> _loadInsights() async {
+    if (_selectedVehicleId == null) return;
+    
+    try {
+      final insights = await _insightsService.getVehicleInsights(
+        int.parse(_selectedVehicleId!)
+      );
+      
+      setState(() {
+        _insights = insights;
+      });
+    } catch (e) {
+      print('Error loading insights: $e');
+    }
+  }
+  
+  Future<void> _generateInsights() async {
+    if (_selectedVehicleId == null) return;
+    
+    setState(() => _isGeneratingInsights = true);
+    
+    try {
+      // Show loading dialog
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: Card(
+            child: Padding(
+              padding: EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Generating insights with AI...'),
+                  SizedBox(height: 8),
+                  Text(
+                    'This may take a few seconds',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      
+      // Get latest telemetry ID
+      final telemetryId = await _insightsService.getLatestTelemetryId(
+        int.parse(_selectedVehicleId!)
+      );
+      
+      if (telemetryId == null) {
+        if (!mounted) return;
+        Navigator.of(context).pop(); // Close loading dialog
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No telemetry data found for this vehicle. Please ensure the vehicle has sent data recently.'),
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 4),
+          ),
+        );
+        return;
+      }
+      
+      // Generate insights
+      final insights = await _insightsService.generateInsights(telemetryId);
+      
+      if (!mounted) return;
+      Navigator.of(context).pop(); // Close loading dialog
+      
+      if (insights != null) {
+        setState(() {
+          _insights = insights;
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ Insights generated successfully!'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to generate insights. Please try again.'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.of(context).pop(); // Close loading dialog
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    } finally {
+      setState(() => _isGeneratingInsights = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_vehicles.isEmpty) {
+      return Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.directions_car_outlined,
+                  size: 80,
+                  color: Colors.grey[400],
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'No Vehicles Registered',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[700],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Add a vehicle first to see insights and recommendations.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Container(
+      body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -61,69 +246,52 @@ class _VehicleStatusScreenState extends State<VehicleStatusScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              // Header with vehicle selector (no duplicated title)
+              // Header with vehicle selector
               Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Vehicle selector dropdown
-                    _vehicles.isEmpty
-                        ? Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.white.withOpacity(0.3)),
-                            ),
-                            child: const Row(
-                              children: [
-                                Icon(Icons.warning_amber_rounded, color: Colors.white),
-                                SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    'No vehicles registered. Add a vehicle first.',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.white.withOpacity(0.3)),
-                            ),
-                            child: DropdownButton<String>(
-                              value: _selectedVehicleId,
-                              isExpanded: true,
-                              underline: const SizedBox(),
-                              dropdownColor: const Color(0xFF5C4FDB),
-                              icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              items: _vehicles.map((vehicle) {
-                                return DropdownMenuItem<String>(
-                                  value: vehicle['id'],
-                                  child: Text(vehicle['displayName']!),
-                                );
-                              }).toList(),
-                              onChanged: (String? newValue) {
-                                setState(() {
-                                  _selectedVehicleId = newValue;
-                                  // TODO: Load status for selected vehicle
-                                });
-                              },
-                            ),
-                          ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.white.withOpacity(0.3)),
+                      ),
+                      child: DropdownButton<String>(
+                        value: _selectedVehicleId,
+                        isExpanded: true,
+                        underline: const SizedBox(),
+                        dropdownColor: const Color(0xFF5C4FDB),
+                        icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        items: _vehicles.map((vehicle) {
+                          return DropdownMenuItem<String>(
+                            value: vehicle['id'],
+                            child: Text(vehicle['displayName']!),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _selectedVehicleId = newValue;
+                            _selectedVehicle = _vehicles.firstWhere((v) => v['id'].toString() == newValue);
+                            _insights = null; // Clear current insights
+                            _recentTelemetry = []; // Clear telemetry
+                          });
+                          // Load insights and telemetry for new vehicle
+                          Future.wait([
+                            _loadInsights(),
+                            _loadTelemetry(),
+                          ]);
+                        },
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -140,9 +308,23 @@ class _VehicleStatusScreenState extends State<VehicleStatusScreen> {
                   ),
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(24.0),
-                    child: _hasIssues
-                        ? _buildFailedState()
-                        : _buildSuccessState(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Vehicle Overview Section
+                        _buildVehicleOverview(),
+                        const SizedBox(height: 24),
+                        
+                        // Recent Telemetry Section
+                        _buildRecentTelemetry(),
+                        const SizedBox(height: 24),
+                        
+                        // AI Insights Section
+                        _insights != null
+                            ? _buildInsightsSection()
+                            : _buildNoInsightsSection(),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -153,517 +335,187 @@ class _VehicleStatusScreenState extends State<VehicleStatusScreen> {
     );
   }
 
-  Widget _buildSuccessState() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Status section
-        const Text(
-          'Status',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: Colors.green.shade50,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.check_circle,
-                color: Colors.green.shade400,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 12),
-            const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'All Systems Nominal',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  Text(
-                    'No issues detected in the engine system.',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.black54,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 32),
-        
-        // Live Metrics section
-        const Text(
-          'Live Metrics',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: _MetricCard(
-                label: 'RPM',
-                value: '850',
-                isNormal: true,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _MetricCard(
-                label: 'Coolant Temp',
-                value: '90°C',
-                isNormal: true,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _MetricCard(
-                label: 'Oil Pressure',
-                value: '40 PSI',
-                isNormal: true,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _MetricCard(
-                label: 'Oil Temp',
-                value: '95°C',
-                isNormal: true,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 32),
-        
-        // Diagnostic Trouble Codes section
-        const Text(
-          'Diagnostic Trouble Codes (DTCs)',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Icon(Icons.description_outlined, color: Colors.grey.shade400),
-            const SizedBox(width: 12),
-            const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'No DTCs Found',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  Text(
-                    'The system scan detected no trouble codes.',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.black54,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 32),
-        
-        // Recommended Actions section
-        const Text(
-          'Recommended Actions',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: Colors.green.shade50,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.thumb_up_outlined,
-                color: Colors.green.shade400,
-                size: 18,
-              ),
-            ),
-            const SizedBox(width: 12),
-            const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'No Action Needed',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  Text(
-                    'Your vehicle\'s engine is operating normally. Continue to drive safely.',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.black54,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 24),
-        
-        // Disclaimer
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade50,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.shade200),
-          ),
-          child: Text(
-            'Disclaimer: This data is for informational purposes only. It is not a substitute for a professional diagnosis. For any vehicle issues, consult a qualified mechanic. Data is cached for offline use.',
-            style: TextStyle(
-              fontSize: 11,
-              color: Colors.grey.shade700,
-              height: 1.4,
-            ),
-          ),
-        ),
-      ],
-    );
+  Color _getRiskColor(String riskLevel) {
+    switch (riskLevel.toUpperCase()) {
+      case 'CRITICAL':
+        return Colors.red;
+      case 'HIGH':
+        return Colors.orange;
+      case 'MEDIUM':
+        return Colors.yellow.shade700;
+      case 'LOW':
+      case 'BAJO':
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
   }
 
-  Widget _buildFailedState() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Status Alert
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.orange.shade50,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.orange.shade200),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                Icons.warning_amber_rounded,
-                color: Colors.orange.shade700,
-                size: 32,
-              ),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Malfunction Indicator Lamp (MIL) ON',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFFE65100),
-                      ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      'The onboard computer has detected an issue.',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Color(0xFFE65100),
-                      ),
-                    ),
-                  ],
+  IconData _getRiskIcon(String riskLevel) {
+    switch (riskLevel.toUpperCase()) {
+      case 'CRITICAL':
+        return Icons.error;
+      case 'HIGH':
+        return Icons.warning;
+      case 'MEDIUM':
+        return Icons.info;
+      case 'LOW':
+      case 'BAJO':
+        return Icons.check_circle;
+      default:
+        return Icons.help;
+    }
+  }
+
+  Color _getScoreColor(int score) {
+    if (score >= 80) return Colors.green;
+    if (score >= 60) return Colors.yellow.shade700;
+    if (score >= 40) return Colors.orange;
+    return Colors.red;
+  }
+  
+  // New methods for Vehicle Overview and Recent Telemetry
+  Widget _buildVehicleOverview() {
+    if (_selectedVehicle == null) return const SizedBox.shrink();
+    
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.directions_car, color: const Color(0xFF5C4FDB)),
+                const SizedBox(width: 8),
+                const Text(
+                  'Vehicle Overview',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 32),
-        
-        // Live Metrics section
-        const Text(
-          'Live Metrics',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: _MetricCard(
-                label: 'RPM',
-                value: '1250',
-                isNormal: false,
-              ),
+              ],
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _MetricCard(
-                label: 'Coolant Temp',
-                value: '105°C',
-                isNormal: false,
-              ),
-            ),
+            const Divider(height: 24),
+            _buildInfoRow('Brand', _selectedVehicle!['brand'] ?? 'N/A'),
+            const SizedBox(height: 12),
+            _buildInfoRow('Model', _selectedVehicle!['model'] ?? 'N/A'),
+            const SizedBox(height: 12),
+            _buildInfoRow('License Plate', _selectedVehicle!['licensePlate'] ?? 'N/A'),
           ],
         ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _MetricCard(
-                label: 'Oil Pressure',
-                value: '20 PSI',
-                isNormal: false,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _MetricCard(
-                label: 'Oil Temp',
-                value: '110°C',
-                isNormal: false,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 32),
-        
-        // Diagnostic Trouble Codes section
-        const Text(
-          'Diagnostic Trouble Codes (DTCs)',
+      ),
+    );
+  }
+  
+  Widget _buildInfoRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
           style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            fontSize: 14,
+            color: Colors.grey.shade600,
           ),
         ),
-        const SizedBox(height: 16),
-        _DTCCard(
-          code: 'P0301',
-          description: 'Cylinder 1 Misfire Detected',
-        ),
-        _DTCCard(
-          code: 'P0171',
-          description: 'System Too Lean (Bank 1)',
-        ),
-        const SizedBox(height: 32),
-        
-        // Recommended Actions section
-        const Text(
-          'Recommended Actions',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 16),
-        _ActionCard(
-          icon: Icons.directions_car,
-          iconColor: Colors.red,
-          title: 'Pull Over Safely',
-          description: 'If performance is severely affected or strange noises are heard, stop driving immediately.',
-        ),
-        _ActionCard(
-          icon: Icons.calendar_today,
-          iconColor: const Color(0xFF5C4FDB),
-          title: 'Book a Diagnostic Check',
-          description: 'Schedule an appointment with a certified mechanic to diagnose the root cause.',
-        ),
-        const SizedBox(height: 24),
-        
-        // Disclaimer
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade50,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.shade200),
-          ),
-          child: Text(
-            'Disclaimer: This data is for informational purposes only and is not a substitute for a professional diagnosis. For any vehicle issues, consult a qualified mechanic. Data is cached for offline use.',
-            style: TextStyle(
-              fontSize: 11,
-              color: Colors.grey.shade700,
-              height: 1.4,
-            ),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
     );
   }
-}
-
-class _MetricCard extends StatelessWidget {
-  final String label;
-  final String value;
-  final bool isNormal;
-
-  const _MetricCard({
-    required this.label,
-    required this.value,
-    required this.isNormal,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isNormal ? Colors.grey.shade50 : Colors.red.shade50,
+  
+  Widget _buildRecentTelemetry() {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isNormal ? Colors.grey.shade200 : Colors.red.shade200,
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.sensors, color: const Color(0xFF5C4FDB)),
+                const SizedBox(width: 8),
+                const Text(
+                  'Recent Activity',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const Divider(height: 24),
+            if (_recentTelemetry.isEmpty)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Text(
+                    'No telemetry data available',
+                    style: TextStyle(color: Colors.grey.shade600),
+                  ),
+                ),
+              )
+            else
+              ..._recentTelemetry.map((telemetry) => _buildTelemetryItem(telemetry)),
+          ],
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 13,
-              color: isNormal ? Colors.grey.shade700 : Colors.red.shade700,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: isNormal ? Colors.black87 : Colors.red.shade700,
-            ),
-          ),
-        ],
-      ),
     );
   }
-}
-
-class _DTCCard extends StatelessWidget {
-  final String code;
-  final String description;
-
-  const _DTCCard({
-    required this.code,
-    required this.description,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.red.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.red.shade200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            code,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.red.shade700,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            description,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.red.shade600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ActionCard extends StatelessWidget {
-  final IconData icon;
-  final Color iconColor;
-  final String title;
-  final String description;
-
-  const _ActionCard({
-    required this.icon,
-    required this.iconColor,
-    required this.title,
-    required this.description,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
+  
+  Widget _buildTelemetryItem(Map<String, dynamic> telemetry) {
+    final sample = telemetry['sample'] as Map<String, dynamic>?;
+    if (sample == null) return const SizedBox.shrink();
+    
+    final type = sample['type'] ?? 'UNKNOWN';
+    final severity = sample['severity'] ?? 'INFO';
+    final timestamp = telemetry['ingestedAt'] as String?;
+    
+    Color severityColor;
+    IconData severityIcon;
+    
+    switch (severity) {
+      case 'CRITICAL':
+        severityColor = Colors.red;
+        severityIcon = Icons.error;
+        break;
+      case 'WARNING':
+        severityColor = Colors.orange;
+        severityIcon = Icons.warning;
+        break;
+      default:
+        severityColor = Colors.blue;
+        severityIcon = Icons.info;
+    }
+    
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 40,
-            height: 40,
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.1),
-              shape: BoxShape.circle,
+              color: severityColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: iconColor, size: 20),
+            child: Icon(severityIcon, color: severityColor, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -671,27 +523,302 @@ class _ActionCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
+                  type.replaceAll('_', ' '),
                   style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  description,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey.shade700,
+                if (timestamp != null)
+                  Text(
+                    _formatTimestamp(timestamp),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
                   ),
-                ),
               ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: severityColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              severity,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                color: severityColor,
+              ),
             ),
           ),
         ],
       ),
     );
   }
+  
+  String _formatTimestamp(String timestamp) {
+    try {
+      final dt = DateTime.parse(timestamp);
+      final now = DateTime.now();
+      final difference = now.difference(dt);
+      
+      if (difference.inMinutes < 60) {
+        return '${difference.inMinutes}m ago';
+      } else if (difference.inHours < 24) {
+        return '${difference.inHours}h ago';
+      } else {
+        return '${difference.inDays}d ago';
+      }
+    } catch (e) {
+      return 'Recently';
+    }
+  }
+  
+  Widget _buildNoInsightsSection() {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            Icon(
+              Icons.analytics_outlined,
+              size: 60,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No AI Insights Available',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[700],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Generate AI-powered insights for personalized recommendations.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: _isGeneratingInsights ? null : _generateInsights,
+              icon: _isGeneratingInsights
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : const Icon(Icons.auto_awesome),
+              label: Text(_isGeneratingInsights ? 'Generating...' : 'Generate Insights'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF5C4FDB),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildInsightsSection() {
+    final riskLevel = _insights!['riskLevel'] ?? 'UNKNOWN';
+    final maintenanceWindow = _insights!['maintenanceWindow'] ?? '';
+    final drivingScore = _insights!['drivingScore'] ?? 0;
+    final recommendations = _insights!['recommendations'] as List?;
+    
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.auto_awesome, color: const Color(0xFF5C4FDB)),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'AI Insights',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                IconButton(
+                  onPressed: _isGeneratingInsights ? null : _generateInsights,
+                  icon: _isGeneratingInsights
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.refresh),
+                  tooltip: 'Refresh Insights',
+                ),
+              ],
+            ),
+            const Divider(height: 24),
+            
+            // Risk Level
+            _buildInsightRow('Risk Level', riskLevel, _getRiskColor(riskLevel)),
+            const SizedBox(height: 16),
+            
+            // Driving Score
+            _buildInsightRow('Driving Score', '$drivingScore/100', _getScoreColor(drivingScore)),
+            const SizedBox(height: 16),
+            
+            // Maintenance Window
+            if (maintenanceWindow.isNotEmpty) ...[
+              Text(
+                'Maintenance Window',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                maintenanceWindow,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+            
+            // Recommendations
+            if (recommendations != null && recommendations.isNotEmpty) ...[
+              const Divider(height: 24),
+              const Text(
+                'Recommendations',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ...recommendations.asMap().entries.map((entry) {
+                final recommendation = entry.value;
+                final title = recommendation is Map ? recommendation['title'] ?? '' : recommendation.toString();
+                final detail = recommendation is Map ? recommendation['detail'] ?? '' : '';
+                
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 24,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF5C4FDB),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Center(
+                          child: Text(
+                            '${entry.key + 1}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            if (detail.isNotEmpty) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                detail,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildInsightRow(String label, String value, Color color) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey.shade600,
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            value,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }
-

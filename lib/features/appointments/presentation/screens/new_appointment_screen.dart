@@ -488,7 +488,7 @@ class _NewAppointmentScreenState extends State<NewAppointmentScreen> {
                                   ),
                                 )
                               : DropdownButtonFormField<String>(
-                                  value: _selectedVehicle,
+                                  initialValue: _selectedVehicle,
                                   decoration: InputDecoration(
                                     hintText: 'Select vehicle',
                                     border: OutlineInputBorder(
@@ -539,7 +539,7 @@ class _NewAppointmentScreenState extends State<NewAppointmentScreen> {
                           ),
                           const SizedBox(height: 8),
                           DropdownButtonFormField<String>(
-                            value: _selectedServiceType,
+                            initialValue: _selectedServiceType,
                             decoration: InputDecoration(
                               hintText: 'Select type',
                               border: OutlineInputBorder(

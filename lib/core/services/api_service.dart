@@ -19,6 +19,9 @@ class ApiService {
     
     if (token != null) {
       headers['Authorization'] = 'Bearer $token';
+      print('[ApiService] 🔑 Token found: ${token.substring(0, 20)}...');
+    } else {
+      print('[ApiService] ⚠️ No token found in SharedPreferences');
     }
     
     return headers;

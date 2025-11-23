@@ -1,16 +1,83 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../auth/application/auth_bloc.dart';
 import '../../../auth/application/auth_state.dart';
+import '../../../../core/services/vehicle_service.dart';
+import '../../../../core/services/insights_service.dart';
+import 'package:intl/intl.dart';
 
 /// Dashboard screen - Main screen showing summary and quick actions
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   final Function(int)? onNavigateToTab;
   
   const DashboardScreen({
     super.key,
     this.onNavigateToTab,
   });
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  final _vehicleService = VehicleService();
+  final _insightsService = InsightsService();
+  
+  int _totalVehicles = 0;
+  String? _lastAlert;
+  String? _lastAlertTime;
+  String? _nextService;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDashboardData();
+  }
+
+  Future<void> _loadDashboardData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final driverId = prefs.getInt('driver_id');
+      
+      if (driverId == null) {
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      // Load vehicles
+      final vehicles = await _vehicleService.getVehicles();
+      setState(() {
+        _totalVehicles = vehicles.length;
+      });
+
+      // If there are vehicles, get insights for the first one
+      if (vehicles.isNotEmpty) {
+        final vehicleId = vehicles.first['id'] as int;
+        
+        // Try to get insights
+        final telemetryId = await _insightsService.getLatestTelemetryId(vehicleId);
+        if (telemetryId != null) {
+          // Try to get insights
+          final insights = await _insightsService.getVehicleInsights(vehicleId);
+          if (insights != null) {
+            setState(() {
+              _lastAlert = insights['drivingAlerts'] ?? 'No alerts';
+              final generatedAt = DateTime.parse(insights['generatedAt']);
+              _lastAlertTime = DateFormat('MMM d, h:mm a').format(generatedAt.toLocal());
+              _nextService = insights['maintenanceWindow'] ?? 'Not available';
+            });
+          }
+        }
+      }
+
+      setState(() => _isLoading = false);
+    } catch (e) {
+      print('Error loading dashboard data: $e');
+      setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -142,7 +209,7 @@ class DashboardScreen extends StatelessWidget {
                             icon: Icons.directions_car,
                             label: 'Vehicle Status',
                             color: const Color(0xFF5C4FDB),
-                            onTap: () => onNavigateToTab?.call(3),
+                            onTap: () => widget.onNavigateToTab?.call(3),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -151,7 +218,7 @@ class DashboardScreen extends StatelessWidget {
                             icon: Icons.calendar_today,
                             label: 'Appointments',
                             color: const Color(0xFFFF6B6B),
-                            onTap: () => onNavigateToTab?.call(4),
+                            onTap: () => widget.onNavigateToTab?.call(4),
                           ),
                         ),
                       ],
@@ -164,7 +231,7 @@ class DashboardScreen extends StatelessWidget {
                             icon: Icons.store,
                             label: 'Workshops',
                             color: const Color(0xFF4ECDC4),
-                            onTap: () => onNavigateToTab?.call(2),
+                            onTap: () => widget.onNavigateToTab?.call(2),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -173,7 +240,8 @@ class DashboardScreen extends StatelessWidget {
                             icon: Icons.garage,
                             label: 'My Vehicles',
                             color: const Color(0xFFFFA726),
-                            onTap: () => onNavigateToTab?.call(1),
+                            badge: _totalVehicles > 0 ? _totalVehicles.toString() : null,
+                            onTap: () => widget.onNavigateToTab?.call(1),
                           ),
                         ),
                       ],
@@ -193,38 +261,40 @@ class DashboardScreen extends StatelessWidget {
                     const SizedBox(height: 16),
 
                     // Last alert received
-                    _SummaryCard(
-                      title: 'Last Alert Received',
-                      content: 'Low Tire Pressure',
-                      subtitle: 'October 20st, 2:30 PM',
-                      icon: Icons.warning_amber_rounded,
-                      iconColor: Colors.orange,
-                      backgroundColor: Colors.orange.shade50,
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    // Current mileage
-                    _SummaryCard(
-                      title: 'Current Mileage',
-                      content: '52,480 km',
-                      subtitle: 'Last synced 10:30 AM',
-                      icon: Icons.speed_rounded,
-                      iconColor: Colors.blue,
-                      backgroundColor: Colors.blue.shade50,
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    // Next service reminder
-                    _SummaryCard(
-                      title: 'Next Service',
-                      content: 'Oil Change Due',
-                      subtitle: 'In 2,520 km',
-                      icon: Icons.build_circle_rounded,
-                      iconColor: Colors.green,
-                      backgroundColor: Colors.green.shade50,
-                    ),
+                    _isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : Column(
+                            children: [
+                              _SummaryCard(
+                                title: 'Total Vehicles',
+                                content: _totalVehicles > 0 ? '$_totalVehicles Vehicle${_totalVehicles > 1 ? 's' : ''}' : 'No vehicles',
+                                subtitle: _totalVehicles > 0 ? 'Registered in your account' : 'Add your first vehicle',
+                                icon: Icons.garage_rounded,
+                                iconColor: const Color(0xFFFFA726),
+                                backgroundColor: Colors.orange.shade50,
+                              ),
+                              const SizedBox(height: 12),
+                              _SummaryCard(
+                                title: 'Last Alert',
+                                content: _lastAlert ?? 'No alerts available',
+                                subtitle: _lastAlertTime ?? 'Check vehicle status',
+                                icon: Icons.warning_amber_rounded,
+                                iconColor: _lastAlert != null && _lastAlert != 'No alerts' ? Colors.orange : Colors.grey,
+                                backgroundColor: _lastAlert != null && _lastAlert != 'No alerts' 
+                                    ? Colors.orange.shade50 
+                                    : Colors.grey.shade50,
+                              ),
+                              const SizedBox(height: 12),
+                              _SummaryCard(
+                                title: 'Next Service',
+                                content: _nextService ?? 'Not available',
+                                subtitle: 'Based on AI insights',
+                                icon: Icons.build_circle_rounded,
+                                iconColor: Colors.green,
+                                backgroundColor: Colors.green.shade50,
+                              ),
+                            ],
+                          ),
 
                     const SizedBox(height: 20),
                   ],
@@ -243,12 +313,14 @@ class _QuickActionCard extends StatelessWidget {
   final String label;
   final Color color;
   final VoidCallback onTap;
+  final String? badge;
 
   const _QuickActionCard({
     required this.icon,
     required this.label,
     required this.color,
     required this.onTap,
+    this.badge,
   });
 
   @override
@@ -274,17 +346,47 @@ class _QuickActionCard extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  icon,
-                  size: 28,
-                  color: color,
-                ),
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      icon,
+                      size: 28,
+                      color: color,
+                    ),
+                  ),
+                  if (badge != null)
+                    Positioned(
+                      top: -4,
+                      right: -4,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 18,
+                          minHeight: 18,
+                        ),
+                        child: Text(
+                          badge!,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
               ),
               const SizedBox(height: 8),
               Flexible(
