@@ -35,6 +35,7 @@ class _NewAppointmentScreenState extends State<NewAppointmentScreen> {
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
   
+  // Service types displayed to user
   final List<String> _serviceTypes = [
     'General Maintenance',
     'Oil Change',
@@ -47,6 +48,20 @@ class _NewAppointmentScreenState extends State<NewAppointmentScreen> {
     'Suspension Repair',
     'Custom Service',
   ];
+  
+  // Map user-friendly names to backend enum values
+  final Map<String, String> _serviceTypeMap = {
+    'General Maintenance': 'GENERAL_MAINTENANCE',
+    'Oil Change': 'OIL_CHANGE',
+    'Brake Service': 'BRAKE_SERVICE',
+    'Tire Service': 'TIRE_SERVICE',
+    'Engine Diagnostics': 'ENGINE_DIAGNOSTICS',
+    'Transmission Service': 'TRANSMISSION_SERVICE',
+    'Electrical Repair': 'ELECTRICAL_REPAIR',
+    'Air Conditioning': 'AIR_CONDITIONING',
+    'Suspension Repair': 'SUSPENSION_REPAIR',
+    'Custom Service': 'CUSTOM',
+  };
 
   @override
   void initState() {
@@ -186,6 +201,9 @@ class _NewAppointmentScreenState extends State<NewAppointmentScreen> {
         final startAt = startDateTime.toUtc().toIso8601String();
         final endAt = endDateTime.toUtc().toIso8601String();
         
+        // Convert service type to backend enum value
+        final backendServiceType = _serviceTypeMap[_selectedServiceType] ?? 'CUSTOM';
+        
         // Prepare appointment data
         final appointmentData = {
           'workshopId': int.parse(widget.workshopId),
@@ -193,7 +211,7 @@ class _NewAppointmentScreenState extends State<NewAppointmentScreen> {
           'driverId': driverId,
           'startAt': startAt,
           'endAt': endAt,
-          'serviceType': _selectedServiceType,
+          'serviceType': backendServiceType,
           'customServiceDescription': _notesController.text.trim().isEmpty 
               ? null 
               : _notesController.text.trim(),

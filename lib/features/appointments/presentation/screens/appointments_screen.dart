@@ -3,9 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../application/appointments_bloc.dart';
 import '../../application/appointments_state.dart';
+import '../../application/appointments_event.dart';
 import 'select_workshop_screen.dart';
 import '../../domain/models/appointment_model.dart';
 import 'appointment_detail_screen.dart';
+import '../../../../core/services/api_service.dart';
 
 /// Screen displaying list of appointments for the driver using BLoC
 class AppointmentsScreen extends StatefulWidget {
@@ -17,22 +19,58 @@ class AppointmentsScreen extends StatefulWidget {
 
 class _AppointmentsScreenState extends State<AppointmentsScreen> {
   String _selectedFilter = 'All';
+  final _apiService = ApiService();
+  int? _driverId;
+  bool _isLoadingDriverId = true;
   
   @override
   void initState() {
     super.initState();
-    // TODO: Get workshopId and driverId from user profile
-    // For now, this is a placeholder
-    // context.read<AppointmentsBloc>().add(
-    //   AppointmentsFetchRequested(workshopId: 1, driverId: 1),
-    // );
+    _loadDriverIdAndAppointments();
+  }
+  
+  Future<void> _loadDriverIdAndAppointments() async {
+    try {
+      print('📅 [AppointmentsScreen] Loading driver ID...');
+      final driverId = await _apiService.getDriverIdWithFallback();
+      
+      if (!mounted) return;
+      
+      setState(() {
+        _driverId = driverId;
+        _isLoadingDriverId = false;
+      });
+      
+      if (driverId != null) {
+        print('📅 [AppointmentsScreen] Driver ID: $driverId, fetching appointments...');
+        // For now, hardcode workshopId to 1
+        // In production, this should come from user selection or profile
+        context.read<AppointmentsBloc>().add(
+          AppointmentsFetchRequested(workshopId: 1, driverId: driverId),
+        );
+      } else {
+        print('📅 [AppointmentsScreen] No driver ID found');
+      }
+    } catch (e) {
+      print('📅 [AppointmentsScreen] Error loading driver ID: $e');
+      if (mounted) {
+        setState(() {
+          _isLoadingDriverId = false;
+        });
+      }
+    }
   }
 
   Future<void> _refreshAppointments() async {
-    // TODO: Implement with actual workshopId and driverId
-    // context.read<AppointmentsBloc>().add(
-    //   AppointmentsRefreshRequested(workshopId: 1, driverId: 1),
-    // );
+    if (_driverId != null) {
+      print('📅 [AppointmentsScreen] Refreshing appointments for driver $_driverId');
+      context.read<AppointmentsBloc>().add(
+        AppointmentsRefreshRequested(workshopId: 1, driverId: _driverId!),
+      );
+    } else {
+      // Try to load driver ID again
+      await _loadDriverIdAndAppointments();
+    }
   }
   
   List<AppointmentModel> _filterAppointments(List<AppointmentModel> appointments) {
@@ -40,11 +78,15 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     
     return appointments.where((apt) {
       switch (_selectedFilter) {
-        case 'Pending':
+        case 'PENDING':
           return apt.status == 'PENDING';
-        case 'Filled':
-          return apt.status == 'CONFIRMED' || apt.status == 'COMPLETED';
-        case 'Canceled':
+        case 'CONFIRMED':
+          return apt.status == 'CONFIRMED';
+        case 'IN_PROGRESS':
+          return apt.status == 'IN_PROGRESS';
+        case 'COMPLETED':
+          return apt.status == 'COMPLETED';
+        case 'CANCELLED':
           return apt.status == 'CANCELLED';
         default:
           return true;
@@ -87,7 +129,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
               ),
               
               // Filter chips
-              Padding(
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Row(
                   children: [
@@ -99,20 +142,32 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                     const SizedBox(width: 8),
                     _FilterChip(
                       label: 'Pending',
-                      isSelected: _selectedFilter == 'Pending',
-                      onTap: () => setState(() => _selectedFilter = 'Pending'),
+                      isSelected: _selectedFilter == 'PENDING',
+                      onTap: () => setState(() => _selectedFilter = 'PENDING'),
                     ),
                     const SizedBox(width: 8),
                     _FilterChip(
-                      label: 'Filled',
-                      isSelected: _selectedFilter == 'Filled',
-                      onTap: () => setState(() => _selectedFilter = 'Filled'),
+                      label: 'Confirmed',
+                      isSelected: _selectedFilter == 'CONFIRMED',
+                      onTap: () => setState(() => _selectedFilter = 'CONFIRMED'),
                     ),
                     const SizedBox(width: 8),
                     _FilterChip(
-                      label: 'Canceled',
-                      isSelected: _selectedFilter == 'Canceled',
-                      onTap: () => setState(() => _selectedFilter = 'Canceled'),
+                      label: 'In Progress',
+                      isSelected: _selectedFilter == 'IN_PROGRESS',
+                      onTap: () => setState(() => _selectedFilter = 'IN_PROGRESS'),
+                    ),
+                    const SizedBox(width: 8),
+                    _FilterChip(
+                      label: 'Completed',
+                      isSelected: _selectedFilter == 'COMPLETED',
+                      onTap: () => setState(() => _selectedFilter = 'COMPLETED'),
+                    ),
+                    const SizedBox(width: 8),
+                    _FilterChip(
+                      label: 'Cancelled',
+                      isSelected: _selectedFilter == 'CANCELLED',
+                      onTap: () => setState(() => _selectedFilter = 'CANCELLED'),
                     ),
                   ],
                 ),
@@ -130,41 +185,77 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                       topRight: Radius.circular(24),
                     ),
                   ),
-                  child: RefreshIndicator(
-                    onRefresh: _refreshAppointments,
-                    child: BlocBuilder<AppointmentsBloc, AppointmentsState>(
-                      builder: (context, state) {
-                        if (state is AppointmentsLoading) {
-                          return const Center(child: CircularProgressIndicator());
-                        }
+                  child: _isLoadingDriverId
+                      ? const Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CircularProgressIndicator(
+                                color: Color(0xFF5C4FDB),
+                              ),
+                              SizedBox(height: 16),
+                              Text(
+                                'Cargando información del conductor...',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ],
+                          ),
+                        )
+                      : _driverId == null
+                          ? Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+                                  const SizedBox(height: 16),
+                                  const Text(
+                                    'No se pudo cargar la información del conductor',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  ElevatedButton(
+                                    onPressed: _loadDriverIdAndAppointments,
+                                    child: const Text('Reintentar'),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : RefreshIndicator(
+                              onRefresh: _refreshAppointments,
+                              child: BlocBuilder<AppointmentsBloc, AppointmentsState>(
+                                builder: (context, state) {
+                                  if (state is AppointmentsLoading) {
+                                    return const Center(child: CircularProgressIndicator());
+                                  }
 
-                        if (state is AppointmentsError) {
-                          return Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
-                                const SizedBox(height: 16),
-                                Text(
-                                  state.message,
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(color: Colors.red),
-                                ),
-                                const SizedBox(height: 16),
-                                ElevatedButton(
-                                  onPressed: _refreshAppointments,
-                                  child: const Text('Reintentar'),
-                                ),
-                              ],
-                            ),
-                          );
-                        }
+                                  if (state is AppointmentsError) {
+                                    return Center(
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+                                          const SizedBox(height: 16),
+                                          Text(
+                                            state.message,
+                                            textAlign: TextAlign.center,
+                                            style: const TextStyle(color: Colors.red),
+                                          ),
+                                          const SizedBox(height: 16),
+                                          ElevatedButton(
+                                            onPressed: _refreshAppointments,
+                                            child: const Text('Reintentar'),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }
 
-                        if (state is AppointmentsEmpty || state is AppointmentsInitial) {
-                          return _EmptyAppointmentsView();
-                        }
+                                  if (state is AppointmentsEmpty || state is AppointmentsInitial) {
+                                    return _EmptyAppointmentsView();
+                                  }
 
-                        if (state is AppointmentsLoaded) {
+                                  if (state is AppointmentsLoaded) {
                           final filteredAppointments = _filterAppointments(state.appointments);
                           
                           if (filteredAppointments.isEmpty) {
@@ -191,12 +282,12 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                               );
                             },
                           );
-                        }
+                                  }
 
-                        return const SizedBox();
-                      },
-                    ),
-                  ),
+                                  return const SizedBox();
+                                },
+                              ),
+                            ),
                 ),
               ),
             ],
@@ -327,12 +418,18 @@ class _AppointmentCard extends StatelessWidget {
   
   String _getStatusLabel() {
     switch (appointment.status) {
+      case 'PENDING':
+        return 'Pending';
       case 'CONFIRMED':
-        return 'Filled';
+        return 'Confirmed';
+      case 'IN_PROGRESS':
+        return 'In Progress';
+      case 'COMPLETED':
+        return 'Completed';
       case 'CANCELLED':
-        return 'Canceled';
+        return 'Cancelled';
       default:
-        return appointment.statusDisplayText;
+        return appointment.status;
     }
   }
 

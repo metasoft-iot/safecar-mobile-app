@@ -24,7 +24,7 @@ class DashboardScreen extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Color(0xFF5C4FDB),  // Purple/Blue
+                  Color(0xFF5C4FDB),
                   Color(0xFF7161EF),
                 ],
               ),
@@ -32,42 +32,79 @@ class DashboardScreen extends StatelessWidget {
             child: SafeArea(
               bottom: false,
               child: Padding(
-                padding: const EdgeInsets.all(24.0),
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Dashboard',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Dashboard',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.notifications_outlined,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
                     BlocBuilder<AuthBloc, AuthState>(
                       builder: (context, state) {
                         String userName = "User";
                         if (state is AuthAuthenticated) {
                           userName = state.user.username.split('@').first;
                         }
-                        return Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          child: Text(
-                            'Hello, "$userName"',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black87,
+                        return Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.person,
+                                color: Colors.white,
+                                size: 24,
+                              ),
                             ),
-                          ),
+                            const SizedBox(width: 12),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Hello, $userName!',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  'Welcome back',
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.9),
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         );
                       },
                     ),
@@ -80,64 +117,63 @@ class DashboardScreen extends StatelessWidget {
           // Content with white background
           Expanded(
             child: Container(
-              color: Colors.white,
+              color: Colors.grey.shade50,
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24.0),
+                padding: const EdgeInsets.all(20.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Quick Actions Section
+                    const Text(
+                      'Quick Actions',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
                     // Quick action buttons - 2x2 grid
                     Row(
                       children: [
                         Expanded(
                           child: _QuickActionCard(
                             icon: Icons.directions_car,
-                            label: 'Vehicle status',
-                            onTap: () {
-                              // Navigate to Status tab (index 2)
-                              onNavigateToTab?.call(2);
-                            },
+                            label: 'Vehicle Status',
+                            color: const Color(0xFF5C4FDB),
+                            onTap: () => onNavigateToTab?.call(3),
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: 12),
                         Expanded(
                           child: _QuickActionCard(
-                            icon: Icons.calendar_today_outlined,
-                            label: 'Next appointment',
-                            onTap: () {
-                              // Navigate to Appointments tab (index 3)
-                              onNavigateToTab?.call(3);
-                            },
+                            icon: Icons.calendar_today,
+                            label: 'Appointments',
+                            color: const Color(0xFFFF6B6B),
+                            onTap: () => onNavigateToTab?.call(4),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     Row(
                       children: [
                         Expanded(
                           child: _QuickActionCard(
-                            icon: Icons.notifications_outlined,
-                            label: 'Active reminders',
-                            onTap: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Feature coming soon'),
-                                  duration: Duration(seconds: 2),
-                                ),
-                              );
-                            },
+                            icon: Icons.store,
+                            label: 'Workshops',
+                            color: const Color(0xFF4ECDC4),
+                            onTap: () => onNavigateToTab?.call(2),
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: 12),
                         Expanded(
                           child: _QuickActionCard(
-                            icon: Icons.build_outlined,
-                            label: 'Maintenance',
-                            onTap: () {
-                              // Navigate to Appointments tab (index 3)
-                              onNavigateToTab?.call(3);
-                            },
+                            icon: Icons.garage,
+                            label: 'My Vehicles',
+                            color: const Color(0xFFFFA726),
+                            onTap: () => onNavigateToTab?.call(1),
                           ),
                         ),
                       ],
@@ -147,9 +183,9 @@ class DashboardScreen extends StatelessWidget {
 
                     // General Summary Section
                     const Text(
-                      'General summary',
+                      'General Summary',
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
                       ),
@@ -157,24 +193,40 @@ class DashboardScreen extends StatelessWidget {
                     const SizedBox(height: 16),
 
                     // Last alert received
-                    _SummaryItem(
-                      title: 'Last alert received',
+                    _SummaryCard(
+                      title: 'Last Alert Received',
                       content: 'Low Tire Pressure',
                       subtitle: 'October 20st, 2:30 PM',
                       icon: Icons.warning_amber_rounded,
                       iconColor: Colors.orange,
+                      backgroundColor: Colors.orange.shade50,
                     ),
 
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
 
                     // Current mileage
-                    _SummaryItem(
-                      title: 'Current mileage',
+                    _SummaryCard(
+                      title: 'Current Mileage',
                       content: '52,480 km',
                       subtitle: 'Last synced 10:30 AM',
-                      icon: Icons.speed,
+                      icon: Icons.speed_rounded,
                       iconColor: Colors.blue,
+                      backgroundColor: Colors.blue.shade50,
                     ),
+
+                    const SizedBox(height: 12),
+
+                    // Next service reminder
+                    _SummaryCard(
+                      title: 'Next Service',
+                      content: 'Oil Change Due',
+                      subtitle: 'In 2,520 km',
+                      icon: Icons.build_circle_rounded,
+                      iconColor: Colors.green,
+                      backgroundColor: Colors.green.shade50,
+                    ),
+
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),
@@ -189,48 +241,63 @@ class DashboardScreen extends StatelessWidget {
 class _QuickActionCard extends StatelessWidget {
   final IconData icon;
   final String label;
+  final Color color;
   final VoidCallback onTap;
 
   const _QuickActionCard({
     required this.icon,
     required this.label,
+    required this.color,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.grey.shade200),
-      ),
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      elevation: 2,
+      shadowColor: color.withOpacity(0.3),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Container(
-          height: 140,
-          padding: const EdgeInsets.all(16),
+          height: 110,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: color.withOpacity(0.3),
+              width: 1.5,
+            ),
+          ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                icon,
-                size: 48,
-                color: Colors.black87,
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  icon,
+                  size: 28,
+                  color: color,
+                ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               Flexible(
                 child: Text(
-                  label.replaceAll('\n', ' '),
+                  label,
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontSize: 13,
+                    fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: Colors.black87,
-                    height: 1.2,
+                    height: 1.1,
                   ),
                 ),
               ),
@@ -242,62 +309,88 @@ class _QuickActionCard extends StatelessWidget {
   }
 }
 
-class _SummaryItem extends StatelessWidget {
+class _SummaryCard extends StatelessWidget {
   final String title;
   final String content;
   final String subtitle;
   final IconData icon;
   final Color iconColor;
+  final Color backgroundColor;
 
-  const _SummaryItem({
+  const _SummaryCard({
     required this.title,
     required this.content,
     required this.subtitle,
     required this.icon,
     required this.iconColor,
+    required this.backgroundColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Icon(icon, color: iconColor, size: 20),
-            const SizedBox(width: 8),
-            Column(
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              color: iconColor,
+              size: 28,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  content,
+                  title,
                   style: TextStyle(
-                    fontSize: 15,
-                    color: Colors.grey.shade800,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade600,
+                    letterSpacing: 0.5,
                   ),
                 ),
+                const SizedBox(height: 4),
+                Text(
+                  content,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 2),
                 Text(
                   subtitle,
                   style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey.shade600,
+                    fontSize: 12,
+                    color: Colors.grey.shade500,
                   ),
                 ),
               ],
             ),
-          ],
-        ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 }
-
