@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../application/vehicles_bloc.dart';
 import '../../application/vehicles_events.dart';
 import '../../application/vehicles_states.dart';
+import '../../domain/model/vehicle.entity.dart';
 
 /// Screen showing vehicle insights with AI-powered recommendations
 class VehicleStatusScreen extends StatefulWidget {
@@ -29,45 +30,40 @@ class _VehicleStatusScreenState extends State<VehicleStatusScreen> {
   }
   
   Future<void> _loadData() async {
-    setState(() => _isLoading = true);
-    
-    try {
-      // Load vehicles using BLoC
+    // Check if vehicles are already loaded
+    final state = context.read<VehiclesStore>().state;
+    if (state is VehiclesLoaded) {
+      _onVehiclesLoaded(state.vehicles);
+    } else {
+      setState(() => _isLoading = true);
       context.read<VehiclesStore>().add(const LoadVehicles());
+    }
+  }
+
+  void _onVehiclesLoaded(List<Vehicle> vehiclesList) {
+    if (!mounted) return;
+    
+    setState(() {
+      _vehicles = vehiclesList.map((v) => {
+        'id': v.id.toString(),
+        'brand': v.brand,
+        'model': v.model,
+        'licensePlate': v.licensePlate,
+        'displayName': v.fullDisplayName,
+      }).toList();
       
-      // Wait for vehicles to load
-      await Future.delayed(const Duration(milliseconds: 500));
+      _isLoading = false;
       
-      final vehiclesState = context.read<VehiclesStore>().state;
-      if (vehiclesState is VehiclesLoaded) {
-        setState(() {
-          _vehicles = vehiclesState.vehicles.map((v) => {
-            'id': v.id.toString(),
-            'brand': v.brand,
-            'model': v.model,
-            'licensePlate': v.licensePlate,
-            'displayName': v.fullDisplayName,
-          }).toList();
-          
-          if (_vehicles.isNotEmpty) {
-            _selectedVehicleId = _vehicles.first['id'].toString();
-            _selectedVehicle = _vehicles.first;
-          }
-        });
+      if (_vehicles.isNotEmpty && _selectedVehicleId == null) {
+        _selectedVehicleId = _vehicles.first['id'].toString();
+        _selectedVehicle = _vehicles.first;
         
         // Load insights and telemetry for selected vehicle
-        if (_selectedVehicleId != null) {
-          await Future.wait([
-            _loadInsights(),
-            _loadTelemetry(),
-          ]);
-        }
+        // These are async but we don't await them here to avoid blocking UI
+        _loadInsights();
+        _loadTelemetry();
       }
-    } catch (e) {
-      print('Error loading data: $e');
-    } finally {
-      setState(() => _isLoading = false);
-    }
+    });
   }
   
   Future<void> _loadTelemetry() async {
@@ -251,6 +247,22 @@ class _VehicleStatusScreenState extends State<VehicleStatusScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return BlocListener<VehiclesStore, VehiclesState>(
+      listener: (context, state) {
+        if (state is VehiclesLoading) {
+          setState(() => _isLoading = true);
+        } else if (state is VehiclesLoaded) {
+          _onVehiclesLoaded(state.vehicles);
+        } else if (state is VehiclesError) {
+          setState(() => _isLoading = false);
+          // Optional: Show error in UI
+        }
+      },
+      child: _buildContent(),
+    );
+  }
+
+  Widget _buildContent() {
     if (_isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
