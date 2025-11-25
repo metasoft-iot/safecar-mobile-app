@@ -1,6 +1,5 @@
 import 'dart:convert';
 import '../../../core/infrastructure/api_service.dart';
-import '../../../core/constants/api_constants.dart';
 import '../resources/appointments_response.dart';
 
 /// API service for appointment operations.
@@ -11,13 +10,12 @@ class AppointmentsApi {
 
   /// Get all appointments for a driver
   Future<AppointmentsResponse> getAppointmentsByDriver({
-    required int workshopId,
     required int driverId,
   }) async {
     print('[AppointmentsApi] 📅 Fetching appointments for driver $driverId');
     
     final response = await _apiService.get(
-      ApiConstants.appointmentsByDriver(workshopId, driverId),
+      '/appointments?driverId=$driverId',
     );
 
     if (response.statusCode == 200) {

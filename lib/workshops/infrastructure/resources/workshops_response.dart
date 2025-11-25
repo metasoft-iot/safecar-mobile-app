@@ -4,12 +4,16 @@ import '../../../core/infrastructure/base_response.dart';
 class WorkshopResource implements BaseResource {
   final int id;
   final int? businessProfileId;
+  final String businessName;
+  final String businessAddress;
   final String workshopDescription;
   final int totalMechanics;
 
   WorkshopResource({
     required this.id,
     this.businessProfileId,
+    required this.businessName,
+    required this.businessAddress,
     required this.workshopDescription,
     required this.totalMechanics,
   });
@@ -18,6 +22,8 @@ class WorkshopResource implements BaseResource {
     return WorkshopResource(
       id: json['id'] as int,
       businessProfileId: json['businessProfileId'] as int?,
+      businessName: json['businessName'] as String? ?? 'Unknown Workshop',
+      businessAddress: json['businessAddress'] as String? ?? 'Unknown Address',
       workshopDescription: json['workshopDescription'] as String? ?? '',
       totalMechanics: json['totalMechanics'] as int? ?? 0,
     );

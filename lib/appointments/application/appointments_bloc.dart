@@ -34,7 +34,6 @@ class AppointmentsStore extends Bloc<AppointmentsEvent, AppointmentsState> {
 
     try {
       final response = await _appointmentsApi.getAppointmentsByDriver(
-        workshopId: event.workshopId,
         driverId: event.driverId,
       );
 

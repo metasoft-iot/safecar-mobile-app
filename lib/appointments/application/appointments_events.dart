@@ -8,16 +8,14 @@ abstract class AppointmentsEvent extends Equatable {
 }
 
 class LoadAppointments extends AppointmentsEvent {
-  final int workshopId;
   final int driverId;
 
   const LoadAppointments({
-    required this.workshopId,
     required this.driverId,
   });
 
   @override
-  List<Object?> get props => [workshopId, driverId];
+  List<Object?> get props => [driverId];
 }
 
 class CreateAppointment extends AppointmentsEvent {

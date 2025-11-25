@@ -8,8 +8,8 @@ class WorkshopAssembler implements BaseAssembler<Workshop, WorkshopResource, Wor
   Workshop toEntityFromResource(WorkshopResource resource) {
     return Workshop(
       id: resource.id,
-      name: resource.workshopDescription,
-      address: '', // Backend doesn't provide address in this version
+      name: resource.businessName,
+      address: resource.businessAddress,
       mechanicsCount: resource.totalMechanics,
     );
   }
@@ -18,6 +18,8 @@ class WorkshopAssembler implements BaseAssembler<Workshop, WorkshopResource, Wor
   WorkshopResource toResourceFromEntity(Workshop entity) {
     return WorkshopResource(
       id: entity.id,
+      businessName: entity.name,
+      businessAddress: entity.address,
       workshopDescription: entity.name,
       totalMechanics: entity.mechanicsCount,
     );

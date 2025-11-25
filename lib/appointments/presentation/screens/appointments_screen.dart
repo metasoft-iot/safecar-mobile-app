@@ -46,7 +46,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
         // For now, hardcode workshopId to 1
         // In production, this should come from user selection or profile
         context.read<AppointmentsStore>().add(
-          LoadAppointments(workshopId: 1, driverId: driverId),
+          LoadAppointments(driverId: driverId),
         );
       } else {
         print('📅 [AppointmentsScreen] No driver ID found');
@@ -65,7 +65,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     if (_driverId != null) {
       print('📅 [AppointmentsScreen] Refreshing appointments for driver $_driverId');
       context.read<AppointmentsStore>().add(
-        LoadAppointments(workshopId: 1, driverId: _driverId!),
+        LoadAppointments(driverId: _driverId!),
       );
     } else {
       // Try to load driver ID again
