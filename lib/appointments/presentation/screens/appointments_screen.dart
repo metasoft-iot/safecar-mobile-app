@@ -29,16 +29,48 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   void initState() {
     super.initState();
     _loadDriverIdAndAppointments();
-    _loadSelectedWorkshop();
+    // Workshop loading is now chained after driver ID loading
   }
   
-  Future<void> _loadSelectedWorkshop() async {
+  Future<void> _loadSelectedWorkshop(int driverId) async {
     final prefs = await SharedPreferences.getInstance();
     if (mounted) {
       setState(() {
-        _selectedWorkshopId = prefs.getString('selected_workshop_id');
-        _selectedWorkshopName = prefs.getString('selected_workshop_name');
+        // Try to get driver-specific workshop first
+        _selectedWorkshopId = prefs.getString('selected_workshop_id_$driverId');
+        _selectedWorkshopName = prefs.getString('selected_workshop_name_$driverId');
+        
+        // Fallback to global if not found (for backward compatibility)
+        if (_selectedWorkshopId == null) {
+          _selectedWorkshopId = prefs.getString('selected_workshop_id');
+          _selectedWorkshopName = prefs.getString('selected_workshop_name');
+        }
       });
+    }
+  }
+
+  Future<void> _unlinkWorkshop() async {
+    if (_driverId == null) return;
+    
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('selected_workshop_id_$_driverId');
+    await prefs.remove('selected_workshop_name_$_driverId');
+    // Also remove global fallback if it exists
+    await prefs.remove('selected_workshop_id');
+    await prefs.remove('selected_workshop_name');
+    
+    if (mounted) {
+      setState(() {
+        _selectedWorkshopId = null;
+        _selectedWorkshopName = null;
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Taller desligado correctamente'),
+          backgroundColor: Colors.orange,
+        ),
+      );
     }
   }
   
@@ -57,8 +89,12 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
       
       if (driverId != null) {
         print('📅 [AppointmentsScreen] Driver ID: $driverId, fetching appointments...');
-        // For now, hardcode workshopId to 1
-        // In production, this should come from user selection or profile
+        
+        // Load the selected workshop for this driver
+        await _loadSelectedWorkshop(driverId);
+        
+        // For now, hardcode workshopId to 1 if we want to filter by workshop, 
+        // but for user appointments we just need driverId
         context.read<AppointmentsStore>().add(
           LoadAppointments(driverId: driverId),
         );
@@ -189,18 +225,36 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                                 ],
                               ),
                             ),
+                            // Unlink button
                             IconButton(
-                              icon: const Icon(Icons.edit, color: Colors.white, size: 20),
+                              icon: const Icon(Icons.link_off, color: Colors.white, size: 20),
+                              tooltip: 'Desligar taller',
                               onPressed: () async {
-                                final result = await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const SelectWorkshopScreen(),
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text('Desligar taller'),
+                                    content: const Text(
+                                      '¿Estás seguro que deseas desligar este taller? Tendrás que seleccionar uno nuevo para crear citas.',
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: const Text('Cancelar'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                          _unlinkWorkshop();
+                                        },
+                                        style: TextButton.styleFrom(
+                                          foregroundColor: Colors.red,
+                                        ),
+                                        child: const Text('Desligar'),
+                                      ),
+                                    ],
                                   ),
                                 );
-                                if (result == true) {
-                                  _loadSelectedWorkshop();
-                                }
                               },
                             ),
                           ],
@@ -402,7 +456,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
               ),
             );
             if (result == true) {
-              await _loadSelectedWorkshop();
+              if (_driverId != null) {
+                await _loadSelectedWorkshop(_driverId!);
+              }
               // Show message to create appointment now
               if (mounted && _selectedWorkshopId != null) {
                 ScaffoldMessenger.of(context).showSnackBar(

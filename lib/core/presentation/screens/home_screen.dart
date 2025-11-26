@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../auth/application/auth_bloc.dart';
-import '../../../auth/application/auth_events.dart';
 import '../../../dashboard/presentation/screens/dashboard_screen.dart';
 import '../../../appointments/presentation/screens/appointments_screen.dart';
 import '../../../vehicles/presentation/screens/vehicles_screen.dart';
@@ -17,10 +14,12 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0; // Start with Dashboard
+  bool _showBackButton = false;
 
-  void _navigateToTab(int index) {
+  void _navigateToTab(int index, {bool showBackButton = false}) {
     setState(() {
       _currentIndex = index;
+      _showBackButton = showBackButton;
     });
   }
 
@@ -44,23 +43,18 @@ class _HomeScreenState extends State<HomeScreen> {
           ? null
           : AppBar(
               title: Text(_getTitleForIndex(_currentIndex)),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.logout),
-                  onPressed: () {
-                        context.read<AuthStore>().add(const AuthSignOutRequested());
-                    Navigator.of(context).pushReplacementNamed('/sign-in');
-                  },
-                ),
-              ],
+              leading: _showBackButton
+                  ? IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () => _navigateToTab(0, showBackButton: false),
+                    )
+                  : null,
             ),
       body: _screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
+          _navigateToTab(index, showBackButton: false);
         },
         type: BottomNavigationBarType.fixed,
         selectedItemColor: const Color(0xFF5C4FDB),

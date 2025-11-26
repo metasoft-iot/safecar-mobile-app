@@ -160,10 +160,21 @@ class ApiService {
     }
   }
 
-  /// Clear all stored authentication data
+  /// Clear stored authentication data, but preserve persistent settings
   Future<void> clearAll() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+    
+    print('[ApiService] 🧹 Clearing session data...');
+    // Explicitly remove only session-related keys
+    await prefs.remove('auth_token');
+    await prefs.remove('user_id');
+    await prefs.remove('user_email');
+    await prefs.remove('driver_id');
+    
+    // Note: We deliberately DO NOT remove 'selected_workshop_id_*' keys
+    // to ensure the workshop selection persists across sessions.
+    
+    print('[ApiService] ✅ Session data cleared (persistent settings preserved)');
   }
 }
 

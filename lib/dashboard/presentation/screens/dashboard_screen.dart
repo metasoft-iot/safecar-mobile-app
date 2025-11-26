@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../auth/application/auth_bloc.dart';
+import '../../../auth/application/auth_events.dart';
 import '../../../auth/application/auth_states.dart';
 import '../../../vehicles/application/vehicles_bloc.dart';
 import '../../../vehicles/application/vehicles_events.dart';
@@ -8,7 +9,7 @@ import '../../../vehicles/application/vehicles_states.dart';
 
 /// Dashboard screen - Main screen showing summary and quick actions
 class DashboardScreen extends StatefulWidget {
-  final Function(int)? onNavigateToTab;
+  final Function(int, {bool showBackButton})? onNavigateToTab;
   
   const DashboardScreen({
     super.key,
@@ -88,17 +89,41 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             letterSpacing: -0.5,
                           ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(
-                            Icons.notifications_outlined,
-                            color: Colors.white,
-                            size: 24,
-                          ),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.notifications_outlined,
+                                color: Colors.white,
+                                size: 24,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            InkWell(
+                              onTap: () {
+                                context.read<AuthStore>().add(const AuthSignOutRequested());
+                                Navigator.of(context).pushReplacementNamed('/sign-in');
+                              },
+                              borderRadius: BorderRadius.circular(12),
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(
+                                  Icons.logout,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -182,7 +207,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             icon: Icons.directions_car,
                             label: 'Vehicle Status',
                             color: const Color(0xFF5C4FDB),
-                            onTap: () => widget.onNavigateToTab?.call(3),
+                            onTap: () => widget.onNavigateToTab?.call(2, showBackButton: true),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -191,7 +216,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             icon: Icons.calendar_today,
                             label: 'Appointments',
                             color: const Color(0xFFFF6B6B),
-                            onTap: () => widget.onNavigateToTab?.call(4),
+                            onTap: () => widget.onNavigateToTab?.call(3, showBackButton: true),
                           ),
                         ),
                       ],
@@ -204,7 +229,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             icon: Icons.store,
                             label: 'Workshops',
                             color: const Color(0xFF4ECDC4),
-                            onTap: () => widget.onNavigateToTab?.call(2),
+                            // Redirecting to Vehicle Status (index 2) as requested
+                            onTap: () => widget.onNavigateToTab?.call(2, showBackButton: true),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -214,7 +240,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             label: 'My Vehicles',
                             color: const Color(0xFFFFA726),
                             badge: _totalVehicles > 0 ? _totalVehicles.toString() : null,
-                            onTap: () => widget.onNavigateToTab?.call(1),
+                            onTap: () => widget.onNavigateToTab?.call(1, showBackButton: true),
                           ),
                         ),
                       ],

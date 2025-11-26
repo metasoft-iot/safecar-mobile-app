@@ -4,7 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../workshops/application/workshops_bloc.dart';
 import '../../../workshops/application/workshops_events.dart';
 import '../../../workshops/application/workshops_states.dart';
-import 'new_appointment_screen.dart';
 
 /// Screen for selecting a workshop before creating an appointment
 class SelectWorkshopScreen extends StatefulWidget {
@@ -144,10 +143,18 @@ class _SelectWorkshopScreenState extends State<SelectWorkshopScreen> {
               return;
             }
             
-            // Save selected workshop in SharedPreferences
+            // Save selected workshop in SharedPreferences linked to driver
             final prefs = await SharedPreferences.getInstance();
-            await prefs.setString('selected_workshop_id', workshopId);
-            await prefs.setString('selected_workshop_name', workshopName);
+            final driverId = prefs.getInt('driver_id');
+            
+            if (driverId != null) {
+              await prefs.setString('selected_workshop_id_$driverId', workshopId);
+              await prefs.setString('selected_workshop_name_$driverId', workshopName);
+            } else {
+              // Fallback for when driver ID is not available (should rarely happen)
+              await prefs.setString('selected_workshop_id', workshopId);
+              await prefs.setString('selected_workshop_name', workshopName);
+            }
             
             if (!mounted) return;
             
