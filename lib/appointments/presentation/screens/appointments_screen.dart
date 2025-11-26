@@ -8,6 +8,7 @@ import '../../application/appointments_events.dart';
 import '../../domain/model/appointment.entity.dart';
 import 'select_workshop_screen.dart';
 import 'appointment_detail_screen.dart';
+import 'new_appointment_screen.dart';
 
 /// Screen displaying list of appointments for the driver using BLoC
 class AppointmentsScreen extends StatefulWidget {
@@ -21,11 +22,24 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   String _selectedFilter = 'All';
   int? _driverId;
   bool _isLoadingDriverId = true;
+  String? _selectedWorkshopId;
+  String? _selectedWorkshopName;
   
   @override
   void initState() {
     super.initState();
     _loadDriverIdAndAppointments();
+    _loadSelectedWorkshop();
+  }
+  
+  Future<void> _loadSelectedWorkshop() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() {
+        _selectedWorkshopId = prefs.getString('selected_workshop_id');
+        _selectedWorkshopName = prefs.getString('selected_workshop_name');
+      });
+    }
   }
   
   Future<void> _loadDriverIdAndAppointments() async {
@@ -111,19 +125,88 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              // Header (no duplicated title)
+              // Header
               Padding(
                 padding: const EdgeInsets.all(20.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Column(
                   children: [
-                    const SizedBox(width: 48), // Spacer for centering
-                    IconButton(
-                      icon: const Icon(Icons.notifications_outlined, color: Colors.white),
-                      onPressed: () {
-                        // TODO: Show notifications
-                      },
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const SizedBox(width: 48), // Spacer for centering
+                        IconButton(
+                          icon: const Icon(Icons.notifications_outlined, color: Colors.white),
+                          onPressed: () {
+                            // TODO: Show notifications
+                          },
+                        ),
+                      ],
                     ),
+                    if (_selectedWorkshopName != null) ...[
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.3),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(
+                                Icons.store,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Taller seleccionado',
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  Text(
+                                    _selectedWorkshopName!,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.edit, color: Colors.white, size: 20),
+                              onPressed: () async {
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const SelectWorkshopScreen(),
+                                  ),
+                                );
+                                if (result == true) {
+                                  _loadSelectedWorkshop();
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -295,13 +378,43 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const SelectWorkshopScreen(),
-            ),
-          );
+        onPressed: () async {
+          if (_selectedWorkshopId != null && _selectedWorkshopName != null) {
+            // Navigate directly to create appointment
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => NewAppointmentScreen(
+                  workshopId: _selectedWorkshopId!,
+                  workshopName: _selectedWorkshopName!,
+                ),
+              ),
+            );
+            if (result == true) {
+              _refreshAppointments();
+            }
+          } else {
+            // Navigate to select workshop first
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const SelectWorkshopScreen(),
+              ),
+            );
+            if (result == true) {
+              await _loadSelectedWorkshop();
+              // Show message to create appointment now
+              if (mounted && _selectedWorkshopId != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('✅ Ahora puedes crear tu primera cita!'),
+                    backgroundColor: Colors.green,
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              }
+            }
+          }
         },
         backgroundColor: const Color(0xFF5C4FDB),
         child: const Icon(Icons.add, color: Colors.white),

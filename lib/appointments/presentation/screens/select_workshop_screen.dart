@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../workshops/application/workshops_bloc.dart';
 import '../../../workshops/application/workshops_events.dart';
 import '../../../workshops/application/workshops_states.dart';
@@ -129,7 +130,7 @@ class _SelectWorkshopScreenState extends State<SelectWorkshopScreen> {
         final workshop = _workshops[index];
         return _WorkshopCard(
           workshop: workshop,
-          onTap: () {
+          onTap: () async {
             final workshopId = workshop['id'];
             final workshopName = workshop['name'] ?? 'Taller';
             
@@ -143,15 +144,23 @@ class _SelectWorkshopScreenState extends State<SelectWorkshopScreen> {
               return;
             }
             
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => NewAppointmentScreen(
-                  workshopId: workshopId,
-                  workshopName: workshopName,
-                ),
+            // Save selected workshop in SharedPreferences
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString('selected_workshop_id', workshopId);
+            await prefs.setString('selected_workshop_name', workshopName);
+            
+            if (!mounted) return;
+            
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('✅ Taller seleccionado: $workshopName'),
+                backgroundColor: Colors.green,
+                duration: const Duration(seconds: 2),
               ),
             );
+            
+            // Navigate back to appointments screen
+            Navigator.pop(context, true);
           },
         );
       },
