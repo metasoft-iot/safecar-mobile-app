@@ -1,7 +1,7 @@
 /// API configuration constants for SafeCar mobile app
 class ApiConstants {
   // Base URL - change this to match your backend deployment
-  static const String baseUrl = 'http://localhost:8080/api/v1';
+  static const String baseUrl = 'https://safecar.joyeria-sharvel.com/api/v1';
   
   // Authentication endpoints
   static const String authSignIn = '/authentication/sign-in';
