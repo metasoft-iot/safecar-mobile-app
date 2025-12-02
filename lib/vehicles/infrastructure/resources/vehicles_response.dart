@@ -8,6 +8,8 @@ class VehicleResource implements BaseResource {
   final String model;
   final int? year;
   final String? vin;
+  final String? color;
+  final int? mileage;
   final int driverId;
 
   VehicleResource({
@@ -17,6 +19,8 @@ class VehicleResource implements BaseResource {
     required this.model,
     this.year,
     this.vin,
+    this.color,
+    this.mileage,
     required this.driverId,
   });
 
@@ -28,6 +32,8 @@ class VehicleResource implements BaseResource {
       model: json['model'] as String,
       year: json['year'] as int?,
       vin: json['vin'] as String?,
+      color: json['color'] as String?,
+      mileage: json['mileage'] as int?,
       driverId: json['driverId'] as int,
     );
   }
@@ -40,6 +46,8 @@ class VehicleResource implements BaseResource {
       'model': model,
       'year': year,
       'vin': vin,
+      'color': color,
+      'mileage': mileage,
       'driverId': driverId,
     };
   }

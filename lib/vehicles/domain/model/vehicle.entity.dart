@@ -7,6 +7,8 @@ class Vehicle {
   final String model;
   final int? year;
   final String? vin;
+  final String? color;
+  final int? mileage;
   final int driverId;
 
   Vehicle({
@@ -16,6 +18,8 @@ class Vehicle {
     required this.model,
     this.year,
     this.vin,
+    this.color,
+    this.mileage,
     required this.driverId,
   });
 
@@ -33,6 +37,8 @@ class Vehicle {
     String? model,
     int? year,
     String? vin,
+    String? color,
+    int? mileage,
     int? driverId,
   }) {
     return Vehicle(
@@ -42,6 +48,8 @@ class Vehicle {
       model: model ?? this.model,
       year: year ?? this.year,
       vin: vin ?? this.vin,
+      color: color ?? this.color,
+      mileage: mileage ?? this.mileage,
       driverId: driverId ?? this.driverId,
     );
   }

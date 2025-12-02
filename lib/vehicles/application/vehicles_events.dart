@@ -20,6 +20,8 @@ class CreateVehicle extends VehiclesEvent {
   final String model;
   final int? year;
   final String? vin;
+  final String? color;
+  final int? mileage;
 
   const CreateVehicle({
     required this.licensePlate,
@@ -27,10 +29,12 @@ class CreateVehicle extends VehiclesEvent {
     required this.model,
     this.year,
     this.vin,
+    this.color,
+    this.mileage,
   });
 
   @override
-  List<Object?> get props => [licensePlate, brand, model, year, vin];
+  List<Object?> get props => [licensePlate, brand, model, year, vin, color, mileage];
 }
 
 /// Event to load insights for a vehicle

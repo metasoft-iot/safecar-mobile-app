@@ -27,7 +27,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
   
   String? _selectedMake;
   String? _selectedModel;
-  final Color _selectedColor = const Color(0xFF5C4FDB);
+  String _selectedColor = 'Blue'; // Default color as string
   String _odometerUnit = 'km';
   bool _isPrimaryVehicle = false;
   bool _isSubmitting = false;
@@ -77,6 +77,8 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
           model: _selectedModel!,
           year: int.tryParse(_modelYearController.text.trim()),
           vin: _vinController.text.trim().isEmpty ? null : _vinController.text.trim(),
+          color: _selectedColor,
+          mileage: int.tryParse(_odometerController.text.trim()),
         ));
         
         if (!mounted) return;
@@ -350,18 +352,38 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                                       ),
                                     ),
                                     const SizedBox(height: 8),
-                                    GestureDetector(
-                                      onTap: () {
-                                        // TODO: Show color picker
-                                      },
-                                      child: Container(
-                                        height: 56,
-                                        decoration: BoxDecoration(
-                                          color: _selectedColor,
+                                    DropdownButtonFormField<String>(
+                                      value: _selectedColor,
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(
                                           borderRadius: BorderRadius.circular(12),
-                                          border: Border.all(color: Colors.grey.shade300),
                                         ),
+                                        filled: true,
+                                        fillColor: Colors.grey.shade50,
                                       ),
+                                      items: const [
+                                        DropdownMenuItem(value: 'White', child: Text('White')),
+                                        DropdownMenuItem(value: 'Black', child: Text('Black')),
+                                        DropdownMenuItem(value: 'Silver', child: Text('Silver')),
+                                        DropdownMenuItem(value: 'Gray', child: Text('Gray')),
+                                        DropdownMenuItem(value: 'Red', child: Text('Red')),
+                                        DropdownMenuItem(value: 'Blue', child: Text('Blue')),
+                                        DropdownMenuItem(value: 'Green', child: Text('Green')),
+                                        DropdownMenuItem(value: 'Yellow', child: Text('Yellow')),
+                                        DropdownMenuItem(value: 'Orange', child: Text('Orange')),
+                                        DropdownMenuItem(value: 'Brown', child: Text('Brown')),
+                                      ],
+                                      onChanged: (String? newValue) {
+                                        setState(() {
+                                          _selectedColor = newValue!;
+                                        });
+                                      },
+                                      validator: (value) {
+                                        if (value == null) {
+                                          return 'Required';
+                                        }
+                                        return null;
+                                      },
                                     ),
                                   ],
                                 ),

@@ -13,6 +13,8 @@ class VehicleAssembler implements BaseAssembler<Vehicle, VehicleResource, Vehicl
       model: resource.model,
       year: resource.year,
       vin: resource.vin,
+      color: resource.color,
+      mileage: resource.mileage,
       driverId: resource.driverId,
     );
   }
@@ -26,6 +28,8 @@ class VehicleAssembler implements BaseAssembler<Vehicle, VehicleResource, Vehicl
       model: entity.model,
       year: entity.year,
       vin: entity.vin,
+      color: entity.color,
+      mileage: entity.mileage,
       driverId: entity.driverId,
     );
   }

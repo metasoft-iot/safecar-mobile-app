@@ -54,6 +54,8 @@ class VehiclesApi {
     required String model,
     int? year,
     String? vin,
+    String? color,
+    int? mileage,
   }) async {
     print('[VehiclesApi] 🚗 Creating vehicle: $brand $model ($licensePlate)');
     
@@ -64,6 +66,8 @@ class VehiclesApi {
       'model': model,
       if (year != null) 'year': year,
       if (vin != null) 'vin': vin,
+      if (color != null) 'color': color,
+      if (mileage != null) 'mileage': mileage,
     };
 
     final response = await _apiService.post(

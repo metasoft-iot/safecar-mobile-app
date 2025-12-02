@@ -96,6 +96,8 @@ class VehiclesStore extends Bloc<VehiclesEvent, VehiclesState> {
         model: event.model,
         year: event.year,
         vin: event.vin,
+        color: event.color,
+        mileage: event.mileage,
       );
 
       final vehicle = _vehicleAssembler.toEntityFromResource(resource);
