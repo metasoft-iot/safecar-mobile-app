@@ -78,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_today_outlined),
             activeIcon: Icon(Icons.calendar_today),
-            label: 'Appointment',
+            label: 'Appointments',
           ),
         ],
       ),
@@ -92,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 2:
         return 'Vehicle Status';
       case 3:
-        return 'Appointment Report';
+        return 'Appointments';
       default:
         return 'SafeCar';
     }

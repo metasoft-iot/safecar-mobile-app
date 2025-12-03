@@ -224,13 +224,13 @@ class _VehicleStatusScreenState extends State<VehicleStatusScreen> {
       Navigator.of(context).pop(); // Close loading dialog
       
       // Check if error is about missing telemetry
-      String errorMessage = 'Error al generar insights';
+      String errorMessage = 'Error generating insights';
       if (e.toString().contains('No telemetry') || 
           e.toString().contains('No se encontraron datos de telemetría') ||
           e.toString().contains('404')) {
-        errorMessage = 'No hay datos de telemetría disponibles para este vehículo. Por favor, agregue datos de telemetría primero.';
+        errorMessage = 'No telemetry data available for this vehicle. Please add telemetry data first.';
       } else {
-        errorMessage = 'Error al generar insights: ${e.toString()}';
+        errorMessage = 'Error generating insights: ${e.toString()}';
       }
       
       ScaffoldMessenger.of(context).showSnackBar(

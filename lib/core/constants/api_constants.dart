@@ -1,7 +1,7 @@
 /// API configuration constants for SafeCar mobile app
 class ApiConstants {
   // Base URL - change this to match your backend deployment
-  static const String baseUrl = 'https://safecar.joyeria-sharvel.com/api/v1';
+  static const String baseUrl = 'https://safecar-backend-production-fe3b.up.railway.app/api/v1';
   
   // Authentication endpoints
   static const String authSignIn = '/authentication/sign-in';
@@ -14,8 +14,8 @@ class ApiConstants {
   
   // Drivers endpoints
   static String driverById(int driverId) => '/drivers/$driverId';
-  static String driverVehicles(int driverId) => '/drivers/$driverId/vehicles';
-  static String driverByProfileId(int profileId) => '/profiles/$profileId/driver';
+  static String driverVehicles(int driverId) => '/vehicles?driver=$driverId';
+  static String driverByProfileId(int profileId) => '/drivers?profile=$profileId';
   
   // Workshop endpoints
   static const String workshops = '/workshops';
@@ -25,7 +25,7 @@ class ApiConstants {
   static String appointmentsByDriver(int workshopId, int driverId) => 
     '/workshops/$workshopId/appointments?driverId=$driverId';
   static String appointmentById(int workshopId, int appointmentId) => 
-    '/workshops/$workshopId/appointments/$appointmentId';
+    '/workshops/$workshopId?appointment=$appointmentId';
   
   // Mechanic endpoints
   static String mechanicById(int mechanicId) => '/mechanics/$mechanicId';

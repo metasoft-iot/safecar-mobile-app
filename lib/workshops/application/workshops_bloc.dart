@@ -40,7 +40,7 @@ class WorkshopsStore extends Bloc<WorkshopsEvent, WorkshopsState> {
       emit(WorkshopsLoaded(workshops: _workshops));
     } catch (e) {
       print('[WorkshopsStore] Error loading workshops: $e');
-      emit(WorkshopsError(message: 'Error al cargar talleres: $e'));
+      emit(WorkshopsError(message: 'Error loading workshops: $e'));
     }
   }
 
@@ -58,7 +58,7 @@ class WorkshopsStore extends Bloc<WorkshopsEvent, WorkshopsState> {
       emit(WorkshopDetailLoaded(workshop: workshop, allWorkshops: _workshops));
     } catch (e) {
       print('[WorkshopsStore] Error loading workshop: $e');
-      emit(WorkshopsError(message: 'Error al cargar taller: $e'));
+      emit(WorkshopsError(message: 'Error loading workshop: $e'));
     }
   }
 }

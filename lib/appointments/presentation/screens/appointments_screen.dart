@@ -67,7 +67,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
       
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Taller desligado correctamente'),
+          content: Text('Workshop unlinked successfully'),
           backgroundColor: Colors.orange,
         ),
       );
@@ -206,7 +206,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const Text(
-                                    'Taller seleccionado',
+                                    'Selected Workshop',
                                     style: TextStyle(
                                       color: Colors.white70,
                                       fontSize: 12,
@@ -228,19 +228,19 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                             // Unlink button
                             IconButton(
                               icon: const Icon(Icons.link_off, color: Colors.white, size: 20),
-                              tooltip: 'Desligar taller',
+                              tooltip: 'Unlink Workshop',
                               onPressed: () async {
                                 showDialog(
                                   context: context,
                                   builder: (context) => AlertDialog(
-                                    title: const Text('Desligar taller'),
+                                    title: const Text('Unlink Workshop'),
                                     content: const Text(
-                                      '¿Estás seguro que deseas desligar este taller? Tendrás que seleccionar uno nuevo para crear citas.',
+                                      'Are you sure you want to unlink this workshop? You will have to select a new one to create appointments.',
                                     ),
                                     actions: [
                                       TextButton(
                                         onPressed: () => Navigator.pop(context),
-                                        child: const Text('Cancelar'),
+                                        child: const Text('Cancel'),
                                       ),
                                       TextButton(
                                         onPressed: () {
@@ -250,7 +250,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                                         style: TextButton.styleFrom(
                                           foregroundColor: Colors.red,
                                         ),
-                                        child: const Text('Desligar'),
+                                        child: const Text('Unlink'),
                                       ),
                                     ],
                                   ),
@@ -332,7 +332,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                               ),
                               SizedBox(height: 16),
                               Text(
-                                'Cargando información del conductor...',
+                                'Loading driver information...',
                                 style: TextStyle(color: Colors.grey),
                               ),
                             ],
@@ -346,14 +346,14 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                                   Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
                                   const SizedBox(height: 16),
                                   const Text(
-                                    'No se pudo cargar la información del conductor',
+                                    'Could not load driver information',
                                     textAlign: TextAlign.center,
                                     style: TextStyle(color: Colors.red),
                                   ),
                                   const SizedBox(height: 16),
                                   ElevatedButton(
                                     onPressed: _loadDriverIdAndAppointments,
-                                    child: const Text('Reintentar'),
+                                    child: const Text('Retry'),
                                   ),
                                 ],
                               ),
@@ -381,7 +381,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                                           const SizedBox(height: 16),
                                           ElevatedButton(
                                             onPressed: _refreshAppointments,
-                                            child: const Text('Reintentar'),
+                                            child: const Text('Retry'),
                                           ),
                                         ],
                                       ),
@@ -463,7 +463,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
               if (mounted && _selectedWorkshopId != null) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('✅ Ahora puedes crear tu primera cita!'),
+                    content: Text('✅ Now you can create your first appointment!'),
                     backgroundColor: Colors.green,
                     duration: Duration(seconds: 2),
                   ),

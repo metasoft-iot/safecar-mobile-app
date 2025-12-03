@@ -55,7 +55,7 @@ class VehiclesStore extends Bloc<VehiclesEvent, VehiclesState> {
       
       if (driverId == null) {
         print('[VehiclesStore] No driver ID found');
-        emit(const VehiclesError(message: 'No se encontró el ID del conductor'));
+        emit(const VehiclesError(message: 'Driver ID not found'));
         return;
       }
 
@@ -66,7 +66,7 @@ class VehiclesStore extends Bloc<VehiclesEvent, VehiclesState> {
       emit(VehiclesLoaded(vehicles: _vehicles));
     } catch (e) {
       print('[VehiclesStore] Error loading vehicles: $e');
-      emit(VehiclesError(message: 'Error al cargar vehículos: $e'));
+      emit(VehiclesError(message: 'Error loading vehicles: $e'));
     }
   }
 
@@ -83,7 +83,7 @@ class VehiclesStore extends Bloc<VehiclesEvent, VehiclesState> {
       if (driverId == null) {
         print('[VehiclesStore] Cannot create vehicle: No driver ID');
         emit(VehiclesError(
-          message: 'No se puede crear el vehículo: No se encontró el ID del conductor',
+          message: 'Cannot create vehicle: Driver ID not found',
           vehicles: _vehicles,
         ));
         return;
@@ -111,7 +111,7 @@ class VehiclesStore extends Bloc<VehiclesEvent, VehiclesState> {
     } catch (e) {
       print('[VehiclesStore] Error creating vehicle: $e');
       emit(VehiclesError(
-        message: 'Error al crear vehículo: $e',
+        message: 'Error creating vehicle: $e',
         vehicles: _vehicles,
       ));
     }
@@ -144,7 +144,7 @@ class VehiclesStore extends Bloc<VehiclesEvent, VehiclesState> {
     } catch (e) {
       print('[VehiclesStore] Error loading insights: $e');
       emit(VehiclesError(
-        message: 'Error al cargar insights: $e',
+        message: 'Error loading insights: $e',
         vehicles: _vehicles,
       ));
     }
@@ -164,7 +164,7 @@ class VehiclesStore extends Bloc<VehiclesEvent, VehiclesState> {
       if (telemetryId == null) {
         print('[VehiclesStore] No telemetry found for vehicle ${event.vehicleId}');
         emit(VehiclesError(
-          message: 'No se encontraron datos de telemetría para este vehículo',
+          message: 'No telemetry data found for this vehicle',
           vehicles: _vehicles,
         ));
         return;
@@ -187,7 +187,7 @@ class VehiclesStore extends Bloc<VehiclesEvent, VehiclesState> {
     } catch (e) {
       print('[VehiclesStore] Error generating insights: $e');
       emit(VehiclesError(
-        message: 'Error al generar insights: $e',
+        message: 'Error generating insights: $e',
         vehicles: _vehicles,
       ));
     }
@@ -225,7 +225,7 @@ class VehiclesStore extends Bloc<VehiclesEvent, VehiclesState> {
     } catch (e) {
       print('[VehiclesStore] Error loading telemetry: $e');
       emit(VehiclesError(
-        message: 'Error al cargar telemetría: $e',
+        message: 'Error loading telemetry: $e',
         vehicles: _vehicles,
       ));
     }

@@ -51,7 +51,7 @@ class AppointmentsStore extends Bloc<AppointmentsEvent, AppointmentsState> {
       }
     } catch (e) {
       print('[AppointmentsStore] Error loading appointments: $e');
-      emit(AppointmentsError(message: 'Error al cargar citas: $e'));
+      emit(AppointmentsError(message: 'Error loading appointments: $e'));
     }
   }
 
@@ -83,7 +83,7 @@ class AppointmentsStore extends Bloc<AppointmentsEvent, AppointmentsState> {
       emit(AppointmentsLoaded(appointments: _appointments));
     } catch (e) {
       print('[AppointmentsStore] Error creating appointment: $e');
-      emit(AppointmentsError(message: 'Error al crear cita: $e'));
+      emit(AppointmentsError(message: 'Error creating appointment: $e'));
     }
   }
 }

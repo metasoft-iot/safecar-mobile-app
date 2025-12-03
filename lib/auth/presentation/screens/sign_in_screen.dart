@@ -77,7 +77,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Portal del Conductor',
+                      'Driver Portal',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             color: Colors.grey[600],
                           ),
@@ -90,7 +90,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       controller: _usernameController,
                       keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
-                        labelText: 'Correo Electrónico',
+                        labelText: 'Email',
                         prefixIcon: const Icon(Icons.email),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -98,10 +98,10 @@ class _SignInScreenState extends State<SignInScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Por favor ingrese su correo';
+                          return 'Please enter your email';
                         }
                         if (!value.contains('@')) {
-                          return 'Por favor ingrese un correo válido';
+                          return 'Please enter a valid email';
                         }
                         return null;
                       },
@@ -113,7 +113,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       controller: _passwordController,
                       obscureText: _obscurePassword,
                       decoration: InputDecoration(
-                        labelText: 'Contraseña',
+                        labelText: 'Password',
                         prefixIcon: const Icon(Icons.lock),
                         suffixIcon: IconButton(
                           icon: Icon(
@@ -133,7 +133,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Por favor ingrese su contraseña';
+                          return 'Please enter your password';
                         }
                         return null;
                       },
@@ -163,7 +163,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                   ),
                                 )
                               : const Text(
-                                  'Iniciar Sesión',
+                                  'Sign In',
                                   style: TextStyle(
                                       fontSize: 16, fontWeight: FontWeight.bold),
                                 ),
@@ -177,7 +177,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       onPressed: () {
                         Navigator.of(context).pushNamed('/sign-up');
                       },
-                      child: const Text('¿No tienes cuenta? Regístrate'),
+                      child: const Text("Don't have an account? Sign up"),
                     ),
                   ],
                 ),

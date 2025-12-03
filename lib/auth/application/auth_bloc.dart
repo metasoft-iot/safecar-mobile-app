@@ -87,7 +87,7 @@ class AuthStore extends Bloc<AuthEvent, AuthState> {
       emit(AuthAuthenticated(user: user));
     } catch (e) {
       print('[AuthStore] Error signing in: $e');
-      emit(AuthError(message: 'Usuario o contraseña incorrectos'));
+      emit(AuthError(message: 'Incorrect email or password'));
     }
   }
 
@@ -152,7 +152,7 @@ class AuthStore extends Bloc<AuthEvent, AuthState> {
       ));
     } catch (e) {
       print('[AuthStore] Error signing up: $e');
-      emit(AuthError(message: 'Error al registrarse: ${e.toString()}'));
+      emit(AuthError(message: 'Error signing up: ${e.toString()}'));
     }
   }
 

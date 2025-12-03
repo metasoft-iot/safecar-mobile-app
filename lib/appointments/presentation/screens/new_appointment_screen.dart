@@ -373,7 +373,7 @@ class _NewAppointmentScreenState extends State<NewAppointmentScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       const Text(
-                                        'Taller Seleccionado',
+                                        'Selected Workshop',
                                         style: TextStyle(
                                           fontSize: 12,
                                           color: Color(0xFF5C4FDB),
@@ -413,7 +413,7 @@ class _NewAppointmentScreenState extends State<NewAppointmentScreen> {
                             controller: _dateController,
                             readOnly: true,
                             decoration: InputDecoration(
-                              hintText: 'dd/mm/aaaa',
+                              hintText: 'dd/mm/yyyy',
                               suffixIcon: const Icon(Icons.calendar_today),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),

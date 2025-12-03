@@ -53,7 +53,7 @@ class _SelectWorkshopScreenState extends State<SelectWorkshopScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Seleccionar Taller',
+          'Select Workshop',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 20,
@@ -87,7 +87,7 @@ class _SelectWorkshopScreenState extends State<SelectWorkshopScreen> {
           ),
           const SizedBox(height: 16),
           const Text(
-            'No hay talleres disponibles',
+            'No workshops available',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -96,7 +96,7 @@ class _SelectWorkshopScreenState extends State<SelectWorkshopScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Por favor, intenta más tarde',
+            'Please try again later',
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey.shade600,
@@ -106,7 +106,7 @@ class _SelectWorkshopScreenState extends State<SelectWorkshopScreen> {
           ElevatedButton.icon(
             onPressed: _loadWorkshops,
             icon: const Icon(Icons.refresh),
-            label: const Text('Reintentar'),
+            label: const Text('Retry'),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF5C4FDB),
               foregroundColor: Colors.white,
@@ -131,12 +131,12 @@ class _SelectWorkshopScreenState extends State<SelectWorkshopScreen> {
           workshop: workshop,
           onTap: () async {
             final workshopId = workshop['id'];
-            final workshopName = workshop['name'] ?? 'Taller';
+            final workshopName = workshop['name'] ?? 'Workshop';
             
             if (workshopId == null) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Error: ID del taller no disponible'),
+                  content: Text('Error: Workshop ID not available'),
                   backgroundColor: Colors.red,
                 ),
               );
@@ -160,7 +160,7 @@ class _SelectWorkshopScreenState extends State<SelectWorkshopScreen> {
             
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('✅ Taller seleccionado: $workshopName'),
+                content: Text('✅ Workshop selected: $workshopName'),
                 backgroundColor: Colors.green,
                 duration: const Duration(seconds: 2),
               ),
@@ -222,7 +222,7 @@ class _WorkshopCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      workshop['name'] ?? 'Taller',
+                      workshop['name'] ?? 'Workshop',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -241,7 +241,7 @@ class _WorkshopCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '${workshop['totalMechanics'] ?? 0} mecánicos',
+                          '${workshop['totalMechanics'] ?? 0} mechanics',
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.grey.shade600,

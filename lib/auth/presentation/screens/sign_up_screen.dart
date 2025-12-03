@@ -39,7 +39,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       if (_passwordController.text != _confirmPasswordController.text) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Las contraseñas no coinciden'),
+            content: Text('Passwords do not match'),
             backgroundColor: Colors.red,
           ),
         );
@@ -60,7 +60,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Registro de Conductor'),
+        title: const Text('Driver Registration'),
       ),
       body: SafeArea(
         child: BlocListener<AuthStore, AuthState>(
@@ -85,7 +85,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 children: [
                   // Personal Information Section
                   Text(
-                    'Información Personal',
+                    'Personal Information',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -95,7 +95,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   TextFormField(
                     controller: _firstNameController,
                     decoration: InputDecoration(
-                      labelText: 'Nombre',
+                      labelText: 'First Name',
                       prefixIcon: const Icon(Icons.person),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -103,7 +103,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Por favor ingrese su nombre';
+                        return 'Please enter your first name';
                       }
                       return null;
                     },
@@ -113,7 +113,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   TextFormField(
                     controller: _lastNameController,
                     decoration: InputDecoration(
-                      labelText: 'Apellido',
+                      labelText: 'Last Name',
                       prefixIcon: const Icon(Icons.person_outline),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -121,7 +121,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Por favor ingrese su apellido';
+                        return 'Please enter your last name';
                       }
                       return null;
                     },
@@ -132,7 +132,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
-                      labelText: 'Correo Electrónico',
+                      labelText: 'Email',
                       prefixIcon: const Icon(Icons.email),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -140,10 +140,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Por favor ingrese su correo';
+                        return 'Please enter your email';
                       }
                       if (!value.contains('@')) {
-                        return 'Por favor ingrese un correo válido';
+                        return 'Please enter a valid email';
                       }
                       return null;
                     },
@@ -154,7 +154,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     controller: _phoneController,
                     keyboardType: TextInputType.phone,
                     decoration: InputDecoration(
-                      labelText: 'Teléfono',
+                      labelText: 'Phone',
                       prefixIcon: const Icon(Icons.phone),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -162,7 +162,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Por favor ingrese su teléfono';
+                        return 'Please enter your phone number';
                       }
                       return null;
                     },
@@ -171,7 +171,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                   // Account Information Section
                   Text(
-                    'Información de Cuenta',
+                    'Account Information',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -182,7 +182,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     controller: _passwordController,
                     obscureText: _obscurePassword,
                     decoration: InputDecoration(
-                      labelText: 'Contraseña',
+                      labelText: 'Password',
                       prefixIcon: const Icon(Icons.lock),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -202,10 +202,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Por favor ingrese una contraseña';
+                        return 'Please enter a password';
                       }
                       if (value.length < 6) {
-                        return 'La contraseña debe tener al menos 6 caracteres';
+                        return 'Password must be at least 6 characters';
                       }
                       return null;
                     },
@@ -216,7 +216,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     controller: _confirmPasswordController,
                     obscureText: _obscureConfirmPassword,
                     decoration: InputDecoration(
-                      labelText: 'Confirmar Contraseña',
+                      labelText: 'Confirm Password',
                       prefixIcon: const Icon(Icons.lock_outline),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -236,7 +236,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Por favor confirme su contraseña';
+                        return 'Please confirm your password';
                       }
                       return null;
                     },
@@ -266,7 +266,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 ),
                               )
                             : const Text(
-                                'Registrarse',
+                                'Sign Up',
                                 style: TextStyle(
                                     fontSize: 16, fontWeight: FontWeight.bold),
                               ),

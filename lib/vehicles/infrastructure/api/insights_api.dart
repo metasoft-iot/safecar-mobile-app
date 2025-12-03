@@ -14,7 +14,7 @@ class InsightsApi {
     print('[InsightsApi] 🔍 Fetching insights for vehicle ID: $vehicleId');
     
     final response = await _apiService.get(
-      '/insights/vehicle/$vehicleId',
+      '/insights?vehicle=$vehicleId',
     );
 
     if (response.statusCode == 200) {
@@ -34,7 +34,7 @@ class InsightsApi {
     print('[InsightsApi] 🔄 Generating insights for telemetry ID: $telemetryId');
     
     final response = await _apiService.post(
-      '/insights/generate/$telemetryId',
+      '/insights?telemetry-records=$telemetryId',
       {},
     );
 
@@ -52,7 +52,7 @@ class InsightsApi {
     print('[InsightsApi] 📡 Fetching recent telemetry for vehicle ID: $vehicleId');
     
     final response = await _apiService.get(
-      '/telemetry?vehicleId=$vehicleId',
+      '/telemetry-records?vehicleId=$vehicleId',
     );
 
     if (response.statusCode == 200) {
@@ -72,7 +72,7 @@ class InsightsApi {
     print('[InsightsApi] 📡 Fetching latest telemetry for vehicle ID: $vehicleId');
     
     final response = await _apiService.get(
-      '/telemetry?vehicleId=$vehicleId',
+      '/telemetry-records?vehicleId=$vehicleId',
     );
 
     if (response.statusCode == 200) {

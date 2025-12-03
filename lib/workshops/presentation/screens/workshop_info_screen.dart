@@ -14,7 +14,7 @@ class WorkshopInfoScreen extends StatelessWidget {
           Icon(Icons.build_circle, size: 64, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
-            'Mi Taller',
+            'My Workshop',
             style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -24,7 +24,7 @@ class WorkshopInfoScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Text(
-              'Información del taller al que estás vinculado',
+              'Information about the workshop you are linked to',
               style: TextStyle(color: Colors.grey[500]),
               textAlign: TextAlign.center,
             ),
